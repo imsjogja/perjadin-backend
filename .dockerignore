@@ -1,0 +1,13 @@
+.env
+.env.*
+!.env.example
+!.env.testing
+.git
+.gitignore
+vendor
+node_modules
+public/build
+storage/logs
+bootstrap/cache/*.php
+Dockerfile
+compose.yaml

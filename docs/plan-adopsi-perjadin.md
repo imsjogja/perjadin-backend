@@ -12,7 +12,7 @@ Perjadin tidak menjadi pemilik master pegawai. Data pegawai bersumber dari SIKKE
 
 - autentikasi API dan RBAC Perjadin;
 - referensi khusus perjalanan: tujuan, transportasi, dasar, rekening, komponen biaya, dan pejabat penandatangan;
-- SPT, tujuan SPT, pejabat SPT, dan penomoran dokumen;
+- SPT, tujuan SPT, pejabat SPT, daftar pelaksana tugas, dan penomoran dokumen;
 - SPPD per pegawai, pengikut, pejabat, serta relasi ke SPT;
 - verifikasi SPPD, kwitansi, rekap periode, dan filter unit;
 - PDF SPT, SPPD, kwitansi, dan visum;
@@ -59,7 +59,7 @@ q, nip, unit_id, aktif, updated_since,
 sort, direction, per_page, page
 ```
 
-`aktif=true` menjadi nilai default. Pencarian hanya boleh menggunakan kolom yang diizinkan dan selalu dibatasi scope unit.
+Endpoint tidak mengasumsikan nilai default untuk `aktif`. Perjadin wajib memverifikasi `aktif=true` sebelum memakai pegawai sebagai pelaksana, pengikut, atau penandatangan transaksi. Pencarian hanya boleh menggunakan kolom yang diizinkan dan selalu dibatasi scope unit.
 
 Contoh respons:
 
@@ -101,7 +101,11 @@ SikkepoPlatformClient → token cache, timeout, retry, audit lokal
 SIKKEPO Platform API /api/v1/platform/pegawai
 ```
 
-Perjadin menyimpan `sikkepo_pegawai_id` sebagai ID eksternal, bukan foreign key ke tabel pegawai lokal. Saat SPT/SPPD dibuat, simpan snapshot immutable berupa NIP, nama, unit, jabatan, golongan, dan eselon agar dokumen historis tetap konsisten ketika master SIKKEPO berubah.
+Perjadin menyimpan `sikkepo_pegawai_id` sebagai ID eksternal, bukan foreign key ke tabel pegawai lokal. Saat pelaksana SPT atau data SPPD dibuat, simpan snapshot immutable berupa NIP, nama, unit, jabatan, golongan, dan eselon agar dokumen historis tetap konsisten ketika master SIKKEPO berubah.
+
+Daftar pelaksana berada pada level SPT dan tidak bergantung pada SPPD. Setiap penambahan setelah SPT dibuat membentuk `assignment_revision`, waktu, dan pengguna pengubah agar keluaran SPT dapat dicetak kembali berdasarkan revisi terakhir. Pelaksana perjalanan dan pengikut pada SPPD harus sudah ada pada daftar pelaksana SPT.
+
+Untuk menerapkan pengecualian tanpa SPD/SPPD secara otomatis, kontrak SPT berikutnya harus menambahkan klasifikasi perjalanan (dalam kota atau lintas kota) dan durasi dalam jam. PMK 113/PMK.05/2012 Pasal 6 membolehkan perjalanan dalam kota sampai delapan jam tanpa SPD; lintas kota dan lebih dari delapan jam menjadi dasar penerbitan SPD. Sampai field tersebut tersedia, daftar pelaksana tidak boleh diperlakukan sebagai keputusan bahwa SPPD tidak diperlukan.
 
 ## 5. Jalur Delivery
 
@@ -126,6 +130,8 @@ POST /api/v1/spts
 GET  /api/v1/spts
 GET  /api/v1/spts/{id}
 PATCH /api/v1/spts/{id}
+GET  /api/v1/spts/{spt}/assignees
+POST /api/v1/spts/{spt}/assignees
 
 POST /api/v1/spts/{spt}/sppds
 PATCH /api/v1/sppds/{id}
