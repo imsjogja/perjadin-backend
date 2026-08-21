@@ -30,6 +30,7 @@ class Spt extends Model
     protected $casts = [
         'issued_date' => 'date',
         'assignment_updated_at' => 'datetime',
+        'archived_at' => 'datetime',
     ];
 
     public function destination(): HasOne

@@ -14,6 +14,87 @@ class PerjadinCoreApiTest extends TestCase
 {
     use RefreshDatabase;
 
+    public function test_spt_list_filters_by_date_assignee_and_status_and_can_be_archived(): void
+    {
+        $this->fakeSikkepo();
+        Sanctum::actingAs(User::factory()->create());
+
+        $unassignedSpt = $this->postJson('/api/v1/spts', $this->sptPayload([
+            'issued_date' => '2026-08-18',
+        ]))
+            ->assertCreated()
+            ->json('data');
+
+        $readySpt = $this->postJson('/api/v1/spts', $this->sptPayload([
+            'issued_date' => '2026-08-20',
+        ]))
+            ->assertCreated()
+            ->json('data');
+
+        $this->postJson("/api/v1/spts/{$readySpt['id']}/assignees", [
+            'nips' => ['198001012010011002'],
+        ])->assertCreated();
+
+        $this->getJson('/api/v1/spts?date_from=2026-08-19&date_to=2026-08-21&assignee=Pelaksana&status=ready')
+            ->assertOk()
+            ->assertJsonCount(1, 'data')
+            ->assertJsonPath('data.0.id', $readySpt['id'])
+            ->assertJsonPath('data.0.assignees_count', 1)
+            ->assertJsonPath('data.0.sppds_count', 0);
+
+        $this->patchJson("/api/v1/spts/{$readySpt['id']}/archive")
+            ->assertOk()
+            ->assertJsonPath('data.id', $readySpt['id']);
+
+        $this->assertDatabaseHas('spts', [
+            'id' => $readySpt['id'],
+        ]);
+        $this->assertDatabaseMissing('spts', [
+            'id' => $readySpt['id'],
+            'archived_at' => null,
+        ]);
+
+        $this->getJson('/api/v1/spts?status=archived')
+            ->assertOk()
+            ->assertJsonCount(1, 'data')
+            ->assertJsonPath('data.0.id', $readySpt['id']);
+
+        $this->getJson('/api/v1/spts?status=unassigned')
+            ->assertOk()
+            ->assertJsonCount(1, 'data')
+            ->assertJsonPath('data.0.id', $unassignedSpt['id']);
+    }
+
+    public function test_spt_without_sppd_can_be_deleted_but_spt_with_sppd_is_preserved(): void
+    {
+        $this->fakeSikkepo();
+        Sanctum::actingAs(User::factory()->create());
+
+        $deletableSpt = $this->postJson('/api/v1/spts', $this->sptPayload())
+            ->assertCreated()
+            ->json('data');
+
+        $this->deleteJson("/api/v1/spts/{$deletableSpt['id']}")
+            ->assertNoContent();
+        $this->assertDatabaseMissing('spts', ['id' => $deletableSpt['id']]);
+
+        $sptWithSppd = $this->postJson('/api/v1/spts', $this->sptPayload([
+            'issued_date' => '2026-08-21',
+        ]))
+            ->assertCreated()
+            ->json('data');
+        $this->postJson("/api/v1/spts/{$sptWithSppd['id']}/assignees", [
+            'nips' => ['198001012010011002'],
+        ])->assertCreated();
+        $this->postJson("/api/v1/spts/{$sptWithSppd['id']}/sppds", $this->sppdPayload())
+            ->assertCreated();
+
+        $this->deleteJson("/api/v1/spts/{$sptWithSppd['id']}")
+            ->assertStatus(409)
+            ->assertJsonPath('code', 'spt_has_sppds');
+        $this->assertDatabaseHas('spts', ['id' => $sptWithSppd['id']]);
+    }
+
     public function test_spt_can_be_updated_without_regenerating_document_number(): void
     {
         $this->fakeSikkepo();

@@ -52,6 +52,8 @@ Route::prefix('v1')->group(function () {
         Route::post('/spts', [SptController::class, 'store']);
         Route::get('/spts/{spt}', [SptController::class, 'show'])->whereUuid('spt');
         Route::patch('/spts/{spt}', [SptController::class, 'update'])->whereUuid('spt');
+        Route::patch('/spts/{spt}/archive', [SptController::class, 'archive'])->whereUuid('spt');
+        Route::delete('/spts/{spt}', [SptController::class, 'destroy'])->whereUuid('spt');
         Route::get('/spts/{spt}/print', [DocumentController::class, 'spt'])->whereUuid('spt');
         Route::get('/spts/{spt}/assignees', [SptAssigneeController::class, 'index'])->whereUuid('spt');
         Route::post('/spts/{spt}/assignees', [SptAssigneeController::class, 'store'])->whereUuid('spt');
