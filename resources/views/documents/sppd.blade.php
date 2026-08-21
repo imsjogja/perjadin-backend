@@ -72,16 +72,21 @@
             <td><table class="inner-table"><tr><td colspan="2">Pembebanan anggaran</td></tr><tr><td style="width:15px">a.</td><td>Instansi</td></tr><tr><td>b.</td><td>Mata anggaran</td></tr></table></td>
             <td><table class="inner-table"><tr><td colspan="2">Satuan kerja</td></tr><tr><td style="width:15px">a.</td><td>{{ $sppd->budget_agency }}</td></tr><tr><td>b.</td><td>{{ $sppd->budget_account }}</td></tr></table></td>
         </tr>
-        <tr><td>10.</td><td>Keterangan</td><td>{{ $sppd->description }}</td></tr>
     </table>
 
-    @include('documents.partials.signatory', [
-        'signatory' => $signatory,
-        'issuedPlace' => $sppd->issued_place,
-        'issuedDate' => $sppd->issued_date,
-        'documentNumber' => $sppd->document_number,
-        'marginTop' => 6,
-    ])
+    <div class="sppd-closing-block">
+        <table class="sppd-table sppd-closing-table">
+            <tr><td style="width:5%">10.</td><td style="width:47.5%">Keterangan</td><td style="width:47.5%">{{ $sppd->description }}</td></tr>
+        </table>
+
+        @include('documents.partials.signatory', [
+            'signatory' => $signatory,
+            'issuedPlace' => $sppd->issued_place,
+            'issuedDate' => $sppd->issued_date,
+            'documentNumber' => $sppd->document_number,
+            'marginTop' => 6,
+        ])
+    </div>
 
     <div class="footer">
         <div style="text-decoration: underline">Tembusan Kepada Yth.</div>

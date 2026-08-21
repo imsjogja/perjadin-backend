@@ -83,7 +83,8 @@
         .visum-signatory-identity { height: 55px; line-height: 1.25; padding: 2px 9px 6px !important; text-align: center; vertical-align: bottom; }
         .small { font-size: inherit; }
         .muted-code { color: #4d4d4d; font-size: 9pt; letter-spacing: 1px; }
-        .document-content { min-height: 333mm; }
+        .sppd-closing-block { page-break-inside: avoid; }
+        .sppd-closing-table { margin-top: -2px; }
         .document-preview { background-image: url("file://{{ resource_path('images/preview-watermark.png') }}"); background-position: 4mm 37mm; background-repeat: repeat; background-size: 102mm 70mm; }
     </style>
 </head>

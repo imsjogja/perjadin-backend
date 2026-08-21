@@ -6,6 +6,7 @@ use App\Models\Sppd;
 use App\Models\Spt;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Testing\TestResponse;
 use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
 
@@ -30,11 +31,12 @@ class DocumentPrintApiTest extends TestCase
                 'code' => 'sppd_not_verified',
             ]);
 
-        $this->get("/api/v1/sppds/{$sppd->id}/preview")
+        $preview = $this->get("/api/v1/sppds/{$sppd->id}/preview")
             ->assertOk()
             ->assertHeader('content-type', 'application/pdf')
             ->assertHeader('content-disposition', 'inline; filename="PREVIEW-SPPD-00001.pdf"')
             ->assertSee('%PDF-', false);
+        $this->assertPdfPageCount($preview, 1);
 
         $sppd->update(['status' => Sppd::STATUS_VERIFIED, 'verified_at' => now()]);
 
@@ -127,5 +129,12 @@ class DocumentPrintApiTest extends TestCase
         ]);
 
         return [$spt, $sppd];
+    }
+
+    private function assertPdfPageCount(TestResponse $response, int $expected): void
+    {
+        preg_match_all('/\/Type\s*\/Page\b/', (string) $response->getContent(), $pages);
+
+        $this->assertCount($expected, $pages[0]);
     }
 }
