@@ -50,6 +50,7 @@ Route::prefix('v1')->group(function () {
         Route::get('/dashboard', DashboardController::class);
         Route::get('/spts', [SptController::class, 'index']);
         Route::post('/spts', [SptController::class, 'store']);
+        Route::get('/spts/filter-options/assignees', [SptController::class, 'assigneeOptions']);
         Route::get('/spts/{spt}', [SptController::class, 'show'])->whereUuid('spt');
         Route::patch('/spts/{spt}', [SptController::class, 'update'])->whereUuid('spt');
         Route::patch('/spts/{spt}/archive', [SptController::class, 'archive'])->whereUuid('spt');

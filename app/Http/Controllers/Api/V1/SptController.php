@@ -8,6 +8,7 @@ use App\Exceptions\SikkepoPlatformException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreSptRequest;
 use App\Models\Spt;
+use App\Models\SptAssignee;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -20,7 +21,7 @@ class SptController extends Controller
             'per_page' => ['nullable', 'integer', 'min:1', 'max:100'],
             'date_from' => ['nullable', 'date'],
             'date_to' => ['nullable', 'date', 'after_or_equal:date_from'],
-            'assignee' => ['nullable', 'string', 'max:150'],
+            'assignee_id' => ['nullable', 'uuid'],
             'status' => ['nullable', 'in:unassigned,ready,archived'],
         ]);
 
@@ -42,9 +43,9 @@ class SptController extends Controller
             $query->whereDate('issued_date', '<=', $filters['date_to']);
         }
 
-        if (isset($filters['assignee'])) {
+        if (isset($filters['assignee_id'])) {
             $query->whereHas('assignees', function ($assignees) use ($filters) {
-                $assignees->where('employee_snapshot->nama', 'like', '%'.$filters['assignee'].'%');
+                $assignees->where('sikkepo_pegawai_id', $filters['assignee_id']);
             });
         }
 
@@ -61,6 +62,33 @@ class SptController extends Controller
         }
 
         return response()->json($query->paginate($filters['per_page'] ?? 25));
+    }
+
+    public function assigneeOptions(Request $request): JsonResponse
+    {
+        $filters = $request->validate([
+            'q' => ['nullable', 'string', 'max:150'],
+        ]);
+
+        $assignees = SptAssignee::query()
+            ->select(['sikkepo_pegawai_id', 'employee_snapshot', 'assigned_at'])
+            ->when(isset($filters['q']), function ($query) use ($filters) {
+                $query->where('employee_snapshot->nama', 'like', '%'.$filters['q'].'%');
+            })
+            ->orderByDesc('assigned_at')
+            ->get()
+            ->unique('sikkepo_pegawai_id')
+            ->take(50)
+            ->map(fn (SptAssignee $assignee) => [
+                'value' => $assignee->sikkepo_pegawai_id,
+                'label' => collect([
+                    data_get($assignee->employee_snapshot, 'nama'),
+                    data_get($assignee->employee_snapshot, 'nip'),
+                ])->filter()->join(' — '),
+            ])
+            ->values();
+
+        return response()->json(['data' => $assignees]);
     }
 
     public function store(StoreSptRequest $request, CreateSptAction $action): JsonResponse

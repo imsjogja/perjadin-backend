@@ -35,12 +35,17 @@ class PerjadinCoreApiTest extends TestCase
             'nips' => ['198001012010011002'],
         ])->assertCreated();
 
-        $this->getJson('/api/v1/spts?date_from=2026-08-19&date_to=2026-08-21&assignee=Pelaksana&status=ready')
+        $this->getJson('/api/v1/spts?date_from=2026-08-19&date_to=2026-08-21&assignee_id=10000000-0000-4000-8000-000000000002&status=ready')
             ->assertOk()
             ->assertJsonCount(1, 'data')
             ->assertJsonPath('data.0.id', $readySpt['id'])
             ->assertJsonPath('data.0.assignees_count', 1)
             ->assertJsonPath('data.0.sppds_count', 0);
+
+        $this->getJson('/api/v1/spts/filter-options/assignees?q=Pelaksana')
+            ->assertOk()
+            ->assertJsonPath('data.0.value', '10000000-0000-4000-8000-000000000002')
+            ->assertJsonPath('data.0.label', 'Pelaksana Perjalanan — 198001012010011002');
 
         $this->patchJson("/api/v1/spts/{$readySpt['id']}/archive")
             ->assertOk()
