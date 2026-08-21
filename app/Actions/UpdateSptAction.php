@@ -29,12 +29,14 @@ class UpdateSptAction
 
             $document->update([
                 'unit_id' => $payload['unit_id'],
-                'dasar' => $payload['dasar'],
+                'dasar' => implode("\n", $payload['dasar']),
                 'disposisi' => $payload['disposisi'] ?? null,
                 'dalam_rangka' => $payload['dalam_rangka'],
                 'issued_place' => $payload['issued_place'],
                 'issued_date' => Carbon::parse($payload['issued_date']),
             ]);
+            $document->bases()->delete();
+            $this->syncBases($document, $payload['dasar']);
             $document->destination()->update($payload['destination']);
             $document->signatory()->updateOrCreate([], [
                 'sikkepo_pegawai_id' => $signatory['pegawai_id'],
@@ -44,7 +46,23 @@ class UpdateSptAction
                 'is_acting' => $payload['signatory']['is_acting'] ?? false,
             ]);
 
-            return $document->fresh()->load(['destination', 'signatory']);
+            return $document->fresh()->load(['bases', 'destination', 'signatory']);
         }, 3);
+    }
+
+    /**
+     * @param  array<int, string>  $bases
+     */
+    private function syncBases(Spt $spt, array $bases): void
+    {
+        $spt->bases()->createMany(
+            collect($bases)
+                ->values()
+                ->map(fn (string $content, int $index): array => [
+                    'content' => $content,
+                    'sort_order' => $index + 1,
+                ])
+                ->all()
+        );
     }
 }

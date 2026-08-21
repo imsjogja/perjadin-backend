@@ -21,7 +21,7 @@ class SptController extends Controller
         ]);
 
         $query = Spt::query()
-            ->with(['destination', 'signatory'])
+            ->with(['bases', 'destination', 'signatory'])
             ->orderByDesc('issued_date')
             ->orderByDesc('sequence_number');
 
@@ -48,7 +48,7 @@ class SptController extends Controller
     public function show(Spt $spt): JsonResponse
     {
         return response()->json([
-            'data' => $spt->load(['destination', 'signatory', 'assignees', 'sppds']),
+            'data' => $spt->load(['bases', 'destination', 'signatory', 'assignees', 'sppds']),
         ]);
     }
 

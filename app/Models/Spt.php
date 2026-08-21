@@ -51,4 +51,9 @@ class Spt extends Model
     {
         return $this->hasMany(Sppd::class);
     }
+
+    public function bases(): HasMany
+    {
+        return $this->hasMany(SptBasis::class)->orderBy('sort_order');
+    }
 }

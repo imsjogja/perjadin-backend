@@ -14,7 +14,7 @@ class DocumentController extends Controller
 {
     public function spt(Spt $spt, PerjadinDocumentPdf $pdf, DocumentQrCode $qrCode): Response
     {
-        $spt->load(['destination', 'signatory', 'assignees']);
+        $spt->load(['bases', 'destination', 'signatory', 'assignees']);
 
         return $pdf->inline(
             'documents.spt',

@@ -15,7 +15,8 @@ class StoreSptRequest extends FormRequest
     {
         return [
             'unit_id' => ['required', 'uuid'],
-            'dasar' => ['required', 'string', 'max:5000'],
+            'dasar' => ['required', 'array', 'min:1', 'max:20'],
+            'dasar.*' => ['required', 'string', 'max:5000', 'distinct'],
             'disposisi' => ['nullable', 'string', 'max:5000'],
             'dalam_rangka' => ['required', 'string', 'max:2000'],
             'issued_place' => ['required', 'string', 'max:150'],
@@ -31,5 +32,14 @@ class StoreSptRequest extends FormRequest
             'signatory.signatory_role' => ['nullable', 'string', 'max:200'],
             'signatory.is_acting' => ['nullable', 'boolean'],
         ];
+    }
+
+    protected function prepareForValidation(): void
+    {
+        if (is_string($this->input('dasar'))) {
+            $this->merge([
+                'dasar' => [$this->input('dasar')],
+            ]);
+        }
     }
 }

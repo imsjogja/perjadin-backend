@@ -62,6 +62,35 @@ class PerjadinCoreApiTest extends TestCase
         ]);
     }
 
+    public function test_spt_stores_multiple_bases_in_order(): void
+    {
+        $this->fakeSikkepo();
+        Sanctum::actingAs(User::factory()->create());
+
+        $spt = $this->postJson('/api/v1/spts', $this->sptPayload([
+            'dasar' => [
+                'Undang-Undang Nomor 23 Tahun 2014.',
+                'Surat undangan koordinasi.',
+            ],
+        ]))
+            ->assertCreated()
+            ->assertJsonPath('data.dasar', "Undang-Undang Nomor 23 Tahun 2014.\nSurat undangan koordinasi.")
+            ->assertJsonPath('data.bases.0.content', 'Undang-Undang Nomor 23 Tahun 2014.')
+            ->assertJsonPath('data.bases.1.content', 'Surat undangan koordinasi.')
+            ->json('data');
+
+        $this->assertDatabaseHas('spt_bases', [
+            'spt_id' => $spt['id'],
+            'content' => 'Undang-Undang Nomor 23 Tahun 2014.',
+            'sort_order' => 1,
+        ]);
+        $this->assertDatabaseHas('spt_bases', [
+            'spt_id' => $spt['id'],
+            'content' => 'Surat undangan koordinasi.',
+            'sort_order' => 2,
+        ]);
+    }
+
     public function test_spt_and_sppd_snapshot_active_sikkepo_employees_and_verify_once(): void
     {
         $this->fakeSikkepo();

@@ -35,13 +35,14 @@ class CreateSptAction
                 'sequence_number' => $number['sequence_number'],
                 'registration_number' => $number['registration_number'],
                 'document_number' => $number['document_number'],
-                'dasar' => $payload['dasar'],
+                'dasar' => implode("\n", $payload['dasar']),
                 'disposisi' => $payload['disposisi'] ?? null,
                 'dalam_rangka' => $payload['dalam_rangka'],
                 'issued_place' => $payload['issued_place'],
                 'issued_date' => $issuedDate,
             ]);
 
+            $this->syncBases($spt, $payload['dasar']);
             $spt->destination()->create($payload['destination']);
             $spt->signatory()->create([
                 'sikkepo_pegawai_id' => $signatory['pegawai_id'],
@@ -51,7 +52,23 @@ class CreateSptAction
                 'is_acting' => $payload['signatory']['is_acting'] ?? false,
             ]);
 
-            return $spt->load(['destination', 'signatory']);
+            return $spt->load(['bases', 'destination', 'signatory']);
         }, 3);
+    }
+
+    /**
+     * @param  array<int, string>  $bases
+     */
+    private function syncBases(Spt $spt, array $bases): void
+    {
+        $spt->bases()->createMany(
+            collect($bases)
+                ->values()
+                ->map(fn (string $content, int $index): array => [
+                    'content' => $content,
+                    'sort_order' => $index + 1,
+                ])
+                ->all()
+        );
     }
 }

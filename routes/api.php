@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\V1\AuthController;
 use App\Http\Controllers\Api\V1\DocumentController;
 use App\Http\Controllers\Api\V1\DocumentNumberFormatController;
+use App\Http\Controllers\Api\V1\DocumentReferenceController;
 use App\Http\Controllers\Api\V1\PegawaiReferenceController;
 use App\Http\Controllers\Api\V1\RoleController;
 use App\Http\Controllers\Api\V1\SppdController;
@@ -43,6 +44,8 @@ Route::prefix('v1')->group(function () {
         Route::get('/me', static fn (Request $request) => response()->json(['data' => $request->user()?->load('role')]));
         Route::get('/references/pegawai', [PegawaiReferenceController::class, 'index']);
         Route::get('/references/units', [UnitReferenceController::class, 'index']);
+        Route::get('/references/{referenceType}', [DocumentReferenceController::class, 'index'])
+            ->where('referenceType', 'mata-anggaran|transportasi|tingkat-perjalanan|jenis-perjalanan');
         Route::get('/spts', [SptController::class, 'index']);
         Route::post('/spts', [SptController::class, 'store']);
         Route::get('/spts/{spt}', [SptController::class, 'show'])->whereUuid('spt');
@@ -77,6 +80,12 @@ Route::prefix('v1')->group(function () {
         });
 
         Route::middleware('permission:settings.manage')->group(function () {
+            Route::post('/references/{referenceType}', [DocumentReferenceController::class, 'store'])
+                ->where('referenceType', 'mata-anggaran|transportasi|tingkat-perjalanan|jenis-perjalanan');
+            Route::patch('/references/{referenceType}/{documentReference}', [DocumentReferenceController::class, 'update'])
+                ->where('referenceType', 'mata-anggaran|transportasi|tingkat-perjalanan|jenis-perjalanan');
+            Route::delete('/references/{referenceType}/{documentReference}', [DocumentReferenceController::class, 'destroy'])
+                ->where('referenceType', 'mata-anggaran|transportasi|tingkat-perjalanan|jenis-perjalanan');
             Route::get('/settings/document-number-formats', [DocumentNumberFormatController::class, 'show']);
             Route::put('/settings/document-number-formats', [DocumentNumberFormatController::class, 'update']);
         });
