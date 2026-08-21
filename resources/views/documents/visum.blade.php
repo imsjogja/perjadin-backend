@@ -82,23 +82,27 @@
                 </tr>
             @endforeach
 
-            <tr class="visum-row-return">
+            <tr class="visum-row-return-content">
+                <td class="visum-return-content">
+                    <table class="visum-data-table">
+                        <colgroup>
+                            <col style="width: 24px">
+                            <col style="width: 105px">
+                            <col style="width: 16px">
+                            <col>
+                        </colgroup>
+                        <tr><td class="visum-number">V.</td><td class="visum-label visum-label-wrap">Tiba Kembali (Tempat kedudukan)</td><td class="visum-colon">:</td><td>&nbsp;</td></tr>
+                        <tr><td></td><td>Pada Tanggal</td><td>:</td><td>&nbsp;</td></tr>
+                    </table>
+                </td>
+                <td class="visum-return-content text-justify">
+                    Telah diperiksa dengan keterangan bahwa perjalanan tersebut atas perintahnya dan semata-mata untuk kepentingan jabatan dalam waktu yang sesingkat-singkatnya.
+                </td>
+            </tr>
+
+            <tr class="visum-row-return-signatures">
                 <td>
-                    <table class="visum-return-table">
-                        <tr>
-                            <td class="visum-return-content">
-                                <table class="visum-data-table">
-                                    <colgroup>
-                                        <col style="width: 24px">
-                                        <col style="width: 105px">
-                                        <col style="width: 16px">
-                                        <col>
-                                    </colgroup>
-                                    <tr><td class="visum-number">V.</td><td class="visum-label visum-label-wrap">Tiba Kembali (Tempat kedudukan)</td><td class="visum-colon">:</td><td>&nbsp;</td></tr>
-                                    <tr><td></td><td>Pada Tanggal</td><td>:</td><td>&nbsp;</td></tr>
-                                </table>
-                            </td>
-                        </tr>
+                    <table class="visum-return-signature-table">
                         <tr><td class="visum-signatory-role">{{ $position }}</td></tr>
                         <tr><td class="visum-signature-space">&nbsp;</td></tr>
                         <tr>
@@ -111,12 +115,7 @@
                     </table>
                 </td>
                 <td>
-                    <table class="visum-return-table">
-                        <tr>
-                            <td class="visum-return-content text-justify">
-                                Telah diperiksa dengan keterangan bahwa perjalanan tersebut atas perintahnya dan semata-mata untuk kepentingan jabatan dalam waktu yang sesingkat-singkatnya.
-                            </td>
-                        </tr>
+                    <table class="visum-return-signature-table">
                         <tr><td class="visum-signatory-role">{{ $position }}</td></tr>
                         <tr><td class="visum-signature-space">&nbsp;</td></tr>
                         <tr>

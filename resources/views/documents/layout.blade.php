@@ -29,7 +29,8 @@
         .visum-table > tbody > tr > td { border: 1px solid #000; padding: 0; vertical-align: top; }
         .visum-row-departure { height: 88px; }
         .visum-row-transit { height: 128px; }
-        .visum-row-return { height: 205px; }
+        .visum-row-return-content { height: 64px; }
+        .visum-row-return-signatures { height: 141px; }
         .visum-row-notes { height: 52px; }
         .visum-row-warning { height: 76px; }
         .visum-row-departure > td,
@@ -42,13 +43,15 @@
         .visum-label-wrap { white-space: normal; }
         .visum-colon { width: 16px; }
         .visum-section-table { height: 128px; table-layout: fixed; }
-        .visum-return-table { height: 205px; table-layout: fixed; }
+        .visum-return-signature-table { height: 141px; table-layout: fixed; }
         .visum-section-table td,
-        .visum-return-table td { border: 0 !important; }
+        .visum-return-signature-table td { border: 0 !important; }
         .visum-section-content { height: 58px; padding: 7px 9px !important; vertical-align: top; }
         .visum-transit-signature { height: 70px; padding: 10px 30px 6px !important; text-align: center; vertical-align: bottom; }
         .visum-nip-label { font-size: 8.5pt; margin-top: 3px; text-align: left; }
-        .visum-return-content { height: 64px; line-height: 1.3; padding: 7px 9px 3px !important; vertical-align: top; }
+        .visum-row-return-content > td { border-bottom: 0 !important; }
+        .visum-row-return-signatures > td { border-top: 0 !important; }
+        .visum-return-content { line-height: 1.3; padding: 7px 9px 3px !important; vertical-align: top; }
         .visum-signatory-role { height: 28px; line-height: 1.25; padding: 3px 9px 0 !important; text-align: center; vertical-align: top; }
         .visum-signature-space { height: 58px; padding: 0 !important; }
         .visum-signatory-identity { height: 55px; line-height: 1.25; padding: 2px 9px 6px !important; text-align: center; vertical-align: bottom; }
