@@ -73,8 +73,11 @@
         .visum-section-table td,
         .visum-return-signature-table td { border: 0 !important; }
         .visum-section-content { height: 58px; padding: 7px 9px !important; vertical-align: top; }
-        .visum-transit-signature { height: 70px; padding: 10px 30px 6px !important; text-align: center; vertical-align: bottom; }
-        .visum-nip-label { font-size: inherit; margin-top: 3px; text-align: left; }
+        .visum-transit-signature { height: 70px; padding: 0 30px 6px !important; vertical-align: bottom; }
+        .visum-transit-signature-table { height: 100%; table-layout: fixed; }
+        .visum-transit-signature-table td { border: 0 !important; padding: 0 !important; }
+        .visum-transit-signature-line { text-align: center; vertical-align: bottom; }
+        .visum-transit-signature-nip { height: 23px; text-align: left; vertical-align: bottom; }
         .visum-row-return-content > td { border-bottom: 0 !important; }
         .visum-row-return-signatures > td { border-top: 0 !important; }
         .visum-return-content { line-height: 1.3; padding: 7px 9px 3px !important; vertical-align: top; }

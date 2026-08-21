@@ -53,10 +53,7 @@
                                 </td>
                             </tr>
                             <tr>
-                                <td class="visum-transit-signature">
-                                    <div>(....................................................)</div>
-                                    <div class="visum-nip-label">NIP.</div>
-                                </td>
+                                <td class="visum-transit-signature">@include('documents.partials.visum-transit-signature')</td>
                             </tr>
                         </table>
                     </td>
@@ -72,10 +69,7 @@
                                 </td>
                             </tr>
                             <tr>
-                                <td class="visum-transit-signature">
-                                    <div>(....................................................)</div>
-                                    <div class="visum-nip-label">NIP.</div>
-                                </td>
+                                <td class="visum-transit-signature">@include('documents.partials.visum-transit-signature')</td>
                             </tr>
                         </table>
                     </td>
