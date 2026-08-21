@@ -25,6 +25,7 @@ class PerjadinDocumentPdf
         $options->set('defaultFont', 'DejaVu Sans');
         $options->set('isRemoteEnabled', false);
         $options->set('isHtml5ParserEnabled', true);
+        $options->setChroot(base_path());
 
         $dompdf = new Dompdf($options);
         $dompdf->loadHtml($this->view->make($view, array_merge($data, [

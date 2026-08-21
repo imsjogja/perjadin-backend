@@ -3,16 +3,25 @@
 <head>
     <meta charset="utf-8">
     <style>
+        @if(! empty($stationery['font_path']))
+            @font-face {
+                font-family: "Source Sans Pro";
+                font-style: normal;
+                font-weight: normal;
+                src: url("file://{{ $stationery['font_path'] }}") format("truetype");
+            }
+        @endif
         @page { margin: 11mm 10mm 12mm; }
         * { box-sizing: border-box; }
         body { color: #000; font-family: DejaVu Sans, sans-serif; font-size: 10pt; line-height: 1.28; margin: 0; }
         table { border-collapse: collapse; width: 100%; }
-        .kop { margin-bottom: 27px; text-align: center; }
+        .kop { font-family: "Source Sans Pro", DejaVu Sans, sans-serif; margin-bottom: 30px; text-align: center; }
         .kop-logo { width: 68px; text-align: left; vertical-align: middle; }
         .kop-logo img { width: 60px; max-height: 70px; object-fit: contain; }
-        .kop-government { font-size: 15pt; line-height: 1.1; margin: 0; text-transform: uppercase; }
-        .kop-agency { font-size: 14pt; font-weight: bold; letter-spacing: .5px; line-height: 1.15; margin: 0; text-transform: uppercase; }
-        .kop-line { border-bottom: 3px solid #000; height: 8px; }
+        .kop-government { font-size: 19pt; font-weight: 450; line-height: 1rem; margin: 0; text-transform: uppercase; transform: scale(1.2, 1); }
+        .kop-agency { font-family: Times, serif; font-size: 18pt; font-weight: bold; letter-spacing: .1rem; line-height: 1rem; margin: 8px 0 0; text-transform: uppercase; transform: scale(1, 1.3); }
+        .kop-address { font-size: 11pt; line-height: 1.2rem; }
+        .kop-line { border-bottom: 3px solid #000; }
         .document-title { font-size: 14pt; font-weight: bold; text-align: center; text-decoration: underline; text-transform: uppercase; }
         .document-number { color: #4d4d4d; font-size: 10pt; letter-spacing: 1px; text-align: center; }
         .text-center { text-align: center; }
