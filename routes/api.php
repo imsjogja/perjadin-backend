@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\V1\AuthController;
+use App\Http\Controllers\Api\V1\DashboardController;
 use App\Http\Controllers\Api\V1\DocumentController;
 use App\Http\Controllers\Api\V1\DocumentNumberFormatController;
 use App\Http\Controllers\Api\V1\DocumentReferenceController;
@@ -46,6 +47,7 @@ Route::prefix('v1')->group(function () {
         Route::get('/references/units', [UnitReferenceController::class, 'index']);
         Route::get('/references/{referenceType}', [DocumentReferenceController::class, 'index'])
             ->where('referenceType', 'mata-anggaran|transportasi|tingkat-perjalanan|jenis-perjalanan');
+        Route::get('/dashboard', DashboardController::class);
         Route::get('/spts', [SptController::class, 'index']);
         Route::post('/spts', [SptController::class, 'store']);
         Route::get('/spts/{spt}', [SptController::class, 'show'])->whereUuid('spt');
