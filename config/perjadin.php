@@ -26,9 +26,11 @@ return [
         /*
          * Logo resmi bawaan dapat diganti dengan path absolut melalui
          * PERJADIN_STATIONERY_LOGO_PATH bila instansi menerbitkan pembaruan.
-         */
+        */
         'logo_path' => env('PERJADIN_STATIONERY_LOGO_PATH') ?: resource_path('images/logo-pabar.png'),
         'font_path' => resource_path('fonts/SourceSansPro-Regular.ttf'),
+        'font_light_path' => resource_path('fonts/SourceSansPro-Light.ttf'),
+        'font_bold_path' => resource_path('fonts/SourceSansPro-Bold.ttf'),
         'copies' => [
             'Kepala Badan Pengelola Keuangan dan Aset Daerah Provinsi Papua Barat;',
             'Arsip',

@@ -22,7 +22,7 @@
         @endif
     </table>
 
-    <p class="text-center" style="font-size: 12pt; font-weight: bold; margin: 15px 0">MEMERINTAHKAN</p>
+    <p class="text-center document-command">MEMERINTAHKAN</p>
 
     <table>
         @forelse($spt->assignees as $index => $assignee)

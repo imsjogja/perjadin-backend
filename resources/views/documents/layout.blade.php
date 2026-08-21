@@ -11,26 +11,43 @@
                 src: url("file://{{ $stationery['font_path'] }}") format("truetype");
             }
         @endif
+        @if(! empty($stationery['font_light_path']))
+            @font-face {
+                font-family: "Source Sans Pro";
+                font-style: normal;
+                font-weight: 300;
+                src: url("file://{{ $stationery['font_light_path'] }}") format("truetype");
+            }
+        @endif
+        @if(! empty($stationery['font_bold_path']))
+            @font-face {
+                font-family: "Source Sans Pro";
+                font-style: normal;
+                font-weight: bold;
+                src: url("file://{{ $stationery['font_bold_path'] }}") format("truetype");
+            }
+        @endif
         @page { margin: 11mm 10mm 12mm; }
         * { box-sizing: border-box; }
-        body { color: #000; font-family: DejaVu Sans, sans-serif; font-size: 10pt; line-height: 1.28; margin: 0; }
+        body { color: #000; font-family: "Source Sans Pro", DejaVu Sans, sans-serif; font-size: 12pt; line-height: 1.28; margin: 0; }
         table { border-collapse: collapse; width: 100%; }
-        .kop { font-family: "Source Sans Pro", DejaVu Sans, sans-serif; margin-bottom: 30px; text-align: center; }
+        .kop { margin-bottom: 30px; text-align: center; }
         .kop-logo { width: 68px; text-align: left; vertical-align: middle; }
         .kop-logo img { width: 60px; max-height: 70px; object-fit: contain; }
-        .kop-government { font-size: 19pt; font-weight: 450; line-height: 1rem; margin: 0; text-transform: uppercase; transform: scale(1.2, 1); }
-        .kop-agency { font-family: Times, serif; font-size: 18pt; font-weight: bold; letter-spacing: .1rem; line-height: 1rem; margin: 8px 0 0; text-transform: uppercase; transform: scale(1, 1.3); }
-        .kop-address { font-size: 11pt; line-height: 1.2rem; }
+        .kop-government { font-family: "Source Sans Pro", DejaVu Sans, serif; font-size: 18pt; font-weight: 400; letter-spacing: .1rem; line-height: 1rem; margin: 0; text-transform: uppercase; transform: scale(1.2, 1); }
+        .kop-agency { font-family: Times, serif; font-size: 18pt; font-weight: bold; letter-spacing: .2rem; line-height: 1rem; margin: 8px 0 0; text-transform: uppercase; transform: scale(1, 1.3); }
+        .kop-address { font-family: "Source Sans Pro", DejaVu Sans, sans-serif; font-size: 11pt; line-height: 1.2rem; }
         .kop-line { border-bottom: 3px solid #000; }
-        .document-title { font-size: 14pt; font-weight: bold; text-align: center; text-decoration: underline; text-transform: uppercase; }
-        .document-number { color: #4d4d4d; font-size: 10pt; letter-spacing: 1px; text-align: center; }
+        .document-title { font-size: 16pt; font-weight: 450; letter-spacing: .25rem; text-align: center; text-decoration: underline; text-transform: uppercase; }
+        .document-command { font-size: 16pt; font-weight: bold; letter-spacing: .25rem; margin: 15px 0; }
+        .document-number { color: #4d4d4d; font-size: 11pt; letter-spacing: 1px; text-align: center; text-transform: uppercase;}
         .text-center { text-align: center; }
         .text-justify { text-align: justify; }
         .va-top { vertical-align: top; }
         .signature-space { height: 43px; }
         .qr-document { font-size: 7pt; text-align: center; vertical-align: middle; }
-        .qr-document img { display: block; height: 66px; margin: 2px auto 0; width: 66px; }
-        .footer { font-size: 9pt; margin-top: 16px; }
+        .qr-document img { display: block; height: 125px; margin: 2px auto 0; width: 125px; }
+        .footer { font-size: 10pt; margin-top: 16px; }
         .sppd-table { border: 2px solid #000; margin-top: 10px; }
         .sppd-table td { border: 1px solid #000; padding: 3px; vertical-align: top; }
         .inner-table td { border: 0; padding: 0; }
@@ -57,14 +74,14 @@
         .visum-return-signature-table td { border: 0 !important; }
         .visum-section-content { height: 58px; padding: 7px 9px !important; vertical-align: top; }
         .visum-transit-signature { height: 70px; padding: 10px 30px 6px !important; text-align: center; vertical-align: bottom; }
-        .visum-nip-label { font-size: 8.5pt; margin-top: 3px; text-align: left; }
+        .visum-nip-label { font-size: inherit; margin-top: 3px; text-align: left; }
         .visum-row-return-content > td { border-bottom: 0 !important; }
         .visum-row-return-signatures > td { border-top: 0 !important; }
         .visum-return-content { line-height: 1.3; padding: 7px 9px 3px !important; vertical-align: top; }
         .visum-signatory-role { height: 28px; line-height: 1.25; padding: 3px 9px 0 !important; text-align: center; vertical-align: top; }
         .visum-signature-space { height: 58px; padding: 0 !important; }
         .visum-signatory-identity { height: 55px; line-height: 1.25; padding: 2px 9px 6px !important; text-align: center; vertical-align: bottom; }
-        .small { font-size: 8.5pt; }
+        .small { font-size: inherit; }
         .muted-code { color: #4d4d4d; font-size: 9pt; letter-spacing: 1px; }
         .preview-watermark { color: #a61b1b; font-size: 25pt; font-weight: bold; opacity: .25; position: fixed; right: 9mm; top: 130mm; transform: rotate(-28deg); }
     </style>
