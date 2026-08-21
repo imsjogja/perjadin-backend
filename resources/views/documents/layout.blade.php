@@ -83,13 +83,13 @@
         .visum-signatory-identity { height: 55px; line-height: 1.25; padding: 2px 9px 6px !important; text-align: center; vertical-align: bottom; }
         .small { font-size: inherit; }
         .muted-code { color: #4d4d4d; font-size: 9pt; letter-spacing: 1px; }
-        .preview-watermark { color: #a61b1b; font-size: 25pt; font-weight: bold; opacity: .25; position: fixed; right: 9mm; top: 130mm; transform: rotate(-28deg); }
+        .document-content { min-height: 333mm; }
+        .document-preview { background-image: url("file://{{ resource_path('images/preview-watermark.png') }}"); background-position: 4mm 37mm; background-repeat: repeat; background-size: 102mm 70mm; }
     </style>
 </head>
 <body>
-    @if(! empty($preview))
-        <div class="preview-watermark">PRATINJAU DRAFT</div>
-    @endif
-    @yield('content')
+    <div @class(['document-content', 'document-preview' => ! empty($preview)])>
+        @yield('content')
+    </div>
 </body>
 </html>

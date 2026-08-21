@@ -45,6 +45,14 @@
         </tr>
         <tr><td>08.</td><td><span class="small">Pengikut: Nama/NIP</span></td><td><span class="small">Gol. Ruang / Keterangan</span></td></tr>
         <tr>
+            <td>&nbsp;</td>
+            <td style="min-height:52px">
+                @forelse($sppd->followers as $index => $follower)
+                    <div class="small">{{ $index + 1 }}. {{ data_get($follower->employee_snapshot, 'nama') }} / {{ data_get($follower->employee_snapshot, 'nip') }}</div>
+                @empty
+                    <div>&nbsp;</div>
+                @endforelse
+            </td>
             <td style="min-height:52px">
                 @forelse($sppd->followers as $follower)
                     @php
@@ -58,14 +66,6 @@
                     <div>&nbsp;</div>
                 @endforelse
             </td>
-            <td style="min-height:52px">
-                @forelse($sppd->followers as $index => $follower)
-                    <div class="small">{{ $index + 1 }}. {{ data_get($follower->employee_snapshot, 'nama') }} / {{ data_get($follower->employee_snapshot, 'nip') }}</div>
-                @empty
-                    <div>&nbsp;</div>
-                @endforelse
-            </td>
-            <td></td>
         </tr>
         <tr>
             <td>09.</td>
