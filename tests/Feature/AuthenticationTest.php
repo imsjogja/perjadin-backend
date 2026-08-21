@@ -29,4 +29,32 @@ class AuthenticationTest extends TestCase
 
         $this->assertDatabaseCount('personal_access_tokens', 1);
     }
+
+    public function test_user_can_keep_active_sessions_on_multiple_devices(): void
+    {
+        $user = User::factory()->create([
+            'email' => 'operator@example.test',
+            'password' => 'password',
+        ]);
+
+        $firstLogin = $this->postJson('/api/v1/auth/login', [
+            'email' => $user->email,
+            'password' => 'password',
+        ])->assertOk();
+        $secondLogin = $this->postJson('/api/v1/auth/login', [
+            'email' => $user->email,
+            'password' => 'password',
+        ])->assertOk();
+
+        $this->assertDatabaseCount('personal_access_tokens', 2);
+
+        $this->withToken((string) $firstLogin->json('access_token'))
+            ->getJson('/api/v1/me')
+            ->assertOk()
+            ->assertJsonPath('data.id', $user->id);
+        $this->withToken((string) $secondLogin->json('access_token'))
+            ->getJson('/api/v1/me')
+            ->assertOk()
+            ->assertJsonPath('data.id', $user->id);
+    }
 }

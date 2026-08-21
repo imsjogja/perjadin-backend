@@ -22,7 +22,6 @@ class AuthController extends Controller
 
         $user = Auth::user();
         abort_unless($user !== null, 401);
-        $user->tokens()->delete();
         $user->load('role');
 
         return response()->json([
