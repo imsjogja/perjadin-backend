@@ -20,7 +20,7 @@ return [
         'secretariat' => env('PERJADIN_STATIONERY_SECRETARIAT', 'Sekretariat Daerah'),
         'address' => env(
             'PERJADIN_STATIONERY_ADDRESS',
-            'Jl. Brigjend Marinir (Pur) Abraham O. Atururi Kompleks Perkantoran Arfai'
+            'Jl.Brigjend Marinir (Pur) Abraham O. Atururi Kompleks Perkantoran Arfai'
         ),
         'city' => env('PERJADIN_STATIONERY_CITY', 'Manokwari'),
         /*
@@ -31,6 +31,16 @@ return [
         'font_path' => resource_path('fonts/SourceSansPro-Regular.ttf'),
         'font_light_path' => resource_path('fonts/SourceSansPro-Light.ttf'),
         'font_bold_path' => resource_path('fonts/SourceSansPro-Bold.ttf'),
+        'source_sans_3_black_font_path' => resource_path('fonts/SourceSans3-Black.ttf'),
+        'calibri_font_path' => env(
+            'PERJADIN_CALIBRI_FONT_PATH',
+            resource_path('fonts/carlito/Carlito-Regular.ttf')
+        ),
+        'calibri_bold_font_path' => env(
+            'PERJADIN_CALIBRI_BOLD_FONT_PATH',
+            resource_path('fonts/carlito/Carlito-Bold.ttf')
+        ),
+        'arial_black_font_path' => env('PERJADIN_ARIAL_BLACK_FONT_PATH'),
         'copies' => [
             'Kepala Badan Pengelola Keuangan dan Aset Daerah Provinsi Papua Barat;',
             'Arsip',

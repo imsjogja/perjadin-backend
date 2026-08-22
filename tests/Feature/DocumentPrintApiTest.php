@@ -46,11 +46,12 @@ class DocumentPrintApiTest extends TestCase
             ->assertHeader('content-disposition', 'inline; filename="SPPD-00001.pdf"')
             ->assertSee('%PDF-', false);
 
-        $this->get("/api/v1/sppds/{$sppd->id}/visum")
+        $visum = $this->get("/api/v1/sppds/{$sppd->id}/visum")
             ->assertOk()
             ->assertHeader('content-type', 'application/pdf')
             ->assertHeader('content-disposition', 'inline; filename="VISUM-SPPD-00001.pdf"')
             ->assertSee('%PDF-', false);
+        $this->assertPdfPageCount($visum, 1);
     }
 
     /**

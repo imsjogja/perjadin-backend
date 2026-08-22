@@ -22,7 +22,7 @@ class PerjadinDocumentPdf
     public function inline(string $view, array $data, string $filename): Response
     {
         $options = new Options;
-        $options->set('defaultFont', 'DejaVu Sans');
+        $options->set('defaultFont', 'Calibri');
         $options->set('isRemoteEnabled', false);
         $options->set('isHtml5ParserEnabled', true);
         $options->setChroot(base_path());

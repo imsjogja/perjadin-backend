@@ -1,5 +1,9 @@
 @extends('documents.layout')
 
+@section('page-style')
+    @page { margin: 25.4mm 18.4mm 25.4mm 20mm; }
+@endsection
+
 @section('content')
     @php
         $signatory = $spt->signatory;
@@ -26,9 +30,13 @@
         };
         $commandLetterIndex = $bases->count();
     @endphp
-    @include('documents.partials.stationery', compact('stationery', 'useSecretariat'))
+    @include('documents.partials.stationery', [
+        'stationery' => $stationery,
+        'useSecretariat' => $useSecretariat,
+        'documentType' => 'spt',
+    ])
 
-    <div style="margin-top: 38px">
+    <div class="document-heading document-heading-spt">
         <div class="document-title">Surat Perintah Tugas</div>
         <div class="document-number">Nomor : {{ $spt->document_number }}</div>
     </div>

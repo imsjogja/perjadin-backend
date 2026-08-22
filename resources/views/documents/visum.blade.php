@@ -18,7 +18,7 @@
         </colgroup>
         <tbody>
             <tr class="visum-row-departure">
-                <td>&nbsp;</td>
+                <td></td>
                 <td>
                     <table class="visum-data-table">
                         <colgroup>
@@ -38,7 +38,7 @@
                 <tr class="visum-row-transit">
                     <td>
                         <table class="visum-section-table">
-                            <tr>
+                            <tr class="visum-transit-content-row">
                                 <td class="visum-section-content">
                                     <table class="visum-data-table">
                                         <colgroup>
@@ -47,28 +47,28 @@
                                             <col style="width: 16px">
                                             <col>
                                         </colgroup>
-                                        <tr><td class="visum-number">{{ $roman }}</td><td class="visum-label">Tiba di</td><td class="visum-colon">:</td><td>&nbsp;</td></tr>
-                                        <tr><td></td><td>Pada Tanggal</td><td>:</td><td>&nbsp;</td></tr>
+                                        <tr><td class="visum-number">{{ $roman }}</td><td class="visum-label">Tiba di</td><td class="visum-colon">:</td><td></td></tr>
+                                        <tr><td></td><td>Pada Tanggal</td><td>:</td><td></td></tr>
                                     </table>
                                 </td>
                             </tr>
-                            <tr>
+                            <tr class="visum-transit-signature-row">
                                 <td class="visum-transit-signature">@include('documents.partials.visum-transit-signature')</td>
                             </tr>
                         </table>
                     </td>
                     <td>
                         <table class="visum-section-table">
-                            <tr>
+                            <tr class="visum-transit-content-row">
                                 <td class="visum-section-content">
                                     <table class="visum-data-table">
-                                        <tr><td class="visum-label">Berangkat dari</td><td class="visum-colon">:</td><td>&nbsp;</td></tr>
-                                        <tr><td>Ke</td><td>:</td><td>&nbsp;</td></tr>
-                                        <tr><td>Pada Tanggal</td><td>:</td><td>&nbsp;</td></tr>
+                                        <tr><td class="visum-label">Berangkat dari</td><td class="visum-colon">:</td><td></td></tr>
+                                        <tr><td>Ke</td><td>:</td><td></td></tr>
+                                        <tr><td>Pada Tanggal</td><td>:</td><td></td></tr>
                                     </table>
                                 </td>
                             </tr>
-                            <tr>
+                            <tr class="visum-transit-signature-row">
                                 <td class="visum-transit-signature">@include('documents.partials.visum-transit-signature')</td>
                             </tr>
                         </table>
@@ -85,8 +85,8 @@
                             <col style="width: 16px">
                             <col>
                         </colgroup>
-                        <tr><td class="visum-number">V.</td><td class="visum-label visum-label-wrap">Tiba Kembali (Tempat kedudukan)</td><td class="visum-colon">:</td><td>&nbsp;</td></tr>
-                        <tr><td></td><td>Pada Tanggal</td><td>:</td><td>&nbsp;</td></tr>
+                        <tr><td class="visum-number">V.</td><td class="visum-label visum-label-wrap">Tiba Kembali (Tempat kedudukan)</td><td class="visum-colon">:</td><td></td></tr>
+                        <tr><td></td><td>Pada Tanggal</td><td>:</td><td></td></tr>
                     </table>
                 </td>
                 <td class="visum-return-content text-justify">
@@ -98,7 +98,7 @@
                 <td>
                     <table class="visum-return-signature-table">
                         <tr><td class="visum-signatory-role">{{ $position }}</td></tr>
-                        <tr><td class="visum-signature-space">&nbsp;</td></tr>
+                        <tr><td class="visum-signature-space"></td></tr>
                         <tr>
                             <td class="visum-signatory-identity">
                                 {{ data_get($employee, 'nama') }}<br>
@@ -111,7 +111,7 @@
                 <td>
                     <table class="visum-return-signature-table">
                         <tr><td class="visum-signatory-role">{{ $position }}</td></tr>
-                        <tr><td class="visum-signature-space">&nbsp;</td></tr>
+                        <tr><td class="visum-signature-space"></td></tr>
                         <tr>
                             <td class="visum-signatory-identity">
                                 {{ data_get($employee, 'nama') }}<br>

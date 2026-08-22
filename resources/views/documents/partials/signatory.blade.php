@@ -29,13 +29,13 @@
                     <td style="border-bottom: 1px solid #000">{{ $issuedDate->format('d/m/Y') }}</td>
                 </tr>
                 @if($signatory->behalf_of)
-                    <tr><td colspan="3" class="text-center" style="padding-top:4px">{{ $signatory->behalf_of }}</td></tr>
+                    <tr><td colspan="3" class="signatory-role" style="padding-top:4px">{{ $signatory->behalf_of }}</td></tr>
                 @endif
-                <tr><td colspan="3" class="text-center" style="padding-top:4px">{{ $acting }}{{ $position }}</td></tr>
+                <tr><td colspan="3" class="signatory-role" style="padding-top:4px">{{ $acting }}{{ $position }}</td></tr>
                 <tr><td colspan="3" class="signature-space"></td></tr>
-                <tr><td colspan="3" class="text-center">{{ data_get($employee, 'nama') }}</td></tr>
-                @if($rank)<tr><td colspan="3" class="text-center">{{ $rank }}</td></tr>@endif
-                <tr><td colspan="3" class="text-center">NIP. {{ data_get($employee, 'nip') }}</td></tr>
+                <tr><td colspan="3" class="signatory-identity">{{ data_get($employee, 'nama') }}</td></tr>
+                @if($rank)<tr><td colspan="3" class="signatory-identity">{{ $rank }}</td></tr>@endif
+                <tr><td colspan="3" class="signatory-identity">NIP. {{ data_get($employee, 'nip') }}</td></tr>
             </table>
         </td>
     </tr>
