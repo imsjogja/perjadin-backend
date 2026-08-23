@@ -405,6 +405,42 @@ class PerjadinCoreApiTest extends TestCase
             ->assertCreated();
     }
 
+    public function test_spt_assignee_without_sppd_can_be_removed_but_assignee_with_sppd_is_preserved(): void
+    {
+        $this->fakeSikkepo();
+        Sanctum::actingAs(User::factory()->create());
+
+        $spt = $this->postJson('/api/v1/spts', $this->sptPayload())
+            ->assertCreated()
+            ->json('data');
+
+        $assignees = $this->postJson("/api/v1/spts/{$spt['id']}/assignees", [
+            'nips' => ['198001012010011002', '198001012010011003'],
+        ])
+            ->assertCreated()
+            ->json('data.assignees');
+
+        $this->postJson("/api/v1/spts/{$spt['id']}/sppds", $this->sppdPayload())
+            ->assertCreated();
+
+        $this->deleteJson("/api/v1/spts/{$spt['id']}/assignees/{$assignees[1]['id']}")
+            ->assertOk()
+            ->assertJsonPath('data.assignment_revision', 2)
+            ->assertJsonCount(1, 'data.assignees');
+
+        $this->assertDatabaseMissing('spt_assignees', [
+            'id' => $assignees[1]['id'],
+        ]);
+
+        $this->deleteJson("/api/v1/spts/{$spt['id']}/assignees/{$assignees[0]['id']}")
+            ->assertStatus(409)
+            ->assertJsonPath('code', 'assignee_has_sppd');
+
+        $this->assertDatabaseHas('spt_assignees', [
+            'id' => $assignees[0]['id'],
+        ]);
+    }
+
     /**
      * @param  array<string, mixed>  $overrides
      * @return array<string, mixed>

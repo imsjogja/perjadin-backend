@@ -58,6 +58,8 @@ Route::prefix('v1')->group(function () {
         Route::get('/spts/{spt}/print', [DocumentController::class, 'spt'])->whereUuid('spt');
         Route::get('/spts/{spt}/assignees', [SptAssigneeController::class, 'index'])->whereUuid('spt');
         Route::post('/spts/{spt}/assignees', [SptAssigneeController::class, 'store'])->whereUuid('spt');
+        Route::delete('/spts/{spt}/assignees/{assignee}', [SptAssigneeController::class, 'destroy'])
+            ->whereUuid(['spt', 'assignee']);
         Route::post('/spts/{spt}/sppds', [SppdController::class, 'store'])->whereUuid('spt');
         Route::get('/sppds/{sppd}', [SppdController::class, 'show'])->whereUuid('sppd');
         Route::get('/sppds/{sppd}/preview', [DocumentController::class, 'previewSppd'])->whereUuid('sppd');
