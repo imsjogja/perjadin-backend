@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\Sppd;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Client\Request;
@@ -177,7 +178,7 @@ class PerjadinCoreApiTest extends TestCase
         ]);
     }
 
-    public function test_spt_and_sppd_snapshot_active_sikkepo_employees_and_verify_once(): void
+    public function test_spt_and_sppd_snapshot_active_sikkepo_employees_and_manage_verification(): void
     {
         $this->fakeSikkepo();
         $user = User::factory()->create();
@@ -273,6 +274,28 @@ class PerjadinCoreApiTest extends TestCase
         $this->patchJson("/api/v1/sppds/{$sppd['id']}/verification")
             ->assertStatus(409)
             ->assertJsonPath('code', 'invalid_sppd_status');
+
+        $this->deleteJson("/api/v1/sppds/{$sppd['id']}/verification")
+            ->assertOk()
+            ->assertJsonPath('data.status', 'draft')
+            ->assertJsonPath('data.verified_at', null)
+            ->assertJsonPath('data.verified_by', null);
+
+        $this->assertDatabaseHas('sppds', [
+            'id' => $sppd['id'],
+            'status' => Sppd::STATUS_DRAFT,
+            'verified_at' => null,
+            'verified_by' => null,
+        ]);
+
+        $this->deleteJson("/api/v1/sppds/{$sppd['id']}/verification")
+            ->assertStatus(409)
+            ->assertJsonPath('code', 'invalid_sppd_status');
+
+        $this->patchJson("/api/v1/sppds/{$sppd['id']}/verification")
+            ->assertOk()
+            ->assertJsonPath('data.status', 'verified')
+            ->assertJsonPath('data.verified_by', $user->id);
 
         $this->deleteJson("/api/v1/sppds/{$sppd['id']}")
             ->assertStatus(409)

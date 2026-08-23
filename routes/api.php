@@ -67,6 +67,8 @@ Route::prefix('v1')->group(function () {
         Route::delete('/sppds/{sppd}', [SppdController::class, 'destroy'])->whereUuid('sppd');
         Route::patch('/sppds/{sppd}/verification', [SppdVerificationController::class, 'update'])
             ->whereUuid('sppd');
+        Route::delete('/sppds/{sppd}/verification', [SppdVerificationController::class, 'destroy'])
+            ->whereUuid('sppd');
 
         Route::middleware('permission:users.manage')->group(function () {
             Route::get('/users', [UserController::class, 'index']);
