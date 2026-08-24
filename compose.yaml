@@ -8,7 +8,7 @@ services:
     env_file:
       - .env.local
     extra_hosts:
-      - "host.docker.internal:host-gateway"
+      - "ims-db-tunnel:172.25.0.1"
     depends_on:
       db:
         condition: service_healthy
@@ -39,3 +39,9 @@ services:
 
 volumes:
   perjadin_mysql_data:
+
+networks:
+  default:
+    ipam:
+      config:
+        - subnet: 172.25.0.0/16
