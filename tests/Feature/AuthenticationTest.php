@@ -57,4 +57,12 @@ class AuthenticationTest extends TestCase
             ->assertOk()
             ->assertJsonPath('data.id', $user->id);
     }
+
+    public function test_unauthenticated_api_request_returns_json_unauthorized_response(): void
+    {
+        $this->get('/api/v1/me', [
+            'Accept' => 'text/html',
+        ])->assertUnauthorized()
+            ->assertJsonPath('message', 'Unauthenticated.');
+    }
 }
