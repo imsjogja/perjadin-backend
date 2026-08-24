@@ -23,8 +23,13 @@ class LegacyPerjadinMappingService
     /**
      * @return array<string, int>
      */
-    public function prepare(bool $dryRun = true, bool $employees = true, bool $units = true): array
-    {
+    public function prepare(
+        bool $dryRun = true,
+        bool $employees = true,
+        bool $units = true,
+        bool $unmappedOnly = false,
+        bool $validNipsOnly = false
+    ): array {
         $report = [
             'employees_mapped' => 0,
             'employees_unresolved' => 0,
@@ -35,7 +40,7 @@ class LegacyPerjadinMappingService
         ];
 
         if ($employees) {
-            $this->prepareEmployees($dryRun, $report);
+            $this->prepareEmployees($dryRun, $report, $unmappedOnly, $validNipsOnly);
         }
 
         if ($units) {
@@ -48,7 +53,12 @@ class LegacyPerjadinMappingService
     /**
      * @param  array<string, int>  $report
      */
-    private function prepareEmployees(bool $dryRun, array &$report): void
+    private function prepareEmployees(
+        bool $dryRun,
+        array &$report,
+        bool $unmappedOnly,
+        bool $validNipsOnly
+    ): void
     {
         $employeeIds = $this->legacy->table('perjadin_spt_pejabat')
             ->select('id_pegawai')
@@ -64,9 +74,27 @@ class LegacyPerjadinMappingService
                 ->where('id', $legacyEmployeeId)
                 ->first(['id', 'nip']);
 
-            if (! $legacyEmployee || trim((string) $legacyEmployee->nip) === '') {
+            if (! $legacyEmployee) {
+                if (! $validNipsOnly) {
+                    $report['employees_unresolved']++;
+                }
+
+                continue;
+            }
+
+            $nip = trim((string) $legacyEmployee->nip);
+
+            if ($validNipsOnly && ! $this->hasUsableNip($nip)) {
+                continue;
+            }
+
+            if ($nip === '') {
                 $report['employees_unresolved']++;
 
+                continue;
+            }
+
+            if ($unmappedOnly && $this->hasEmployeeMapping((int) $legacyEmployee->id)) {
                 continue;
             }
 
@@ -74,7 +102,7 @@ class LegacyPerjadinMappingService
 
             try {
                 $payload = $this->sikkepo->pegawai([
-                    'nip' => (string) $legacyEmployee->nip,
+                    'nip' => $nip,
                     'per_page' => 1,
                 ]);
             } catch (SikkepoPlatformException $exception) {
@@ -88,7 +116,7 @@ class LegacyPerjadinMappingService
             $pegawaiId = is_array($employee) ? $employee['pegawai_id'] ?? null : null;
 
             if (! is_array($employee)
-                || ($employee['nip'] ?? null) !== $legacyEmployee->nip
+                || ($employee['nip'] ?? null) !== $nip
                 || ! is_string($pegawaiId)
                 || ! Str::isUuid($pegawaiId)) {
                 $report['employees_unresolved']++;
@@ -101,7 +129,7 @@ class LegacyPerjadinMappingService
                     'source_database' => $this->sourceDatabase,
                     'legacy_employee_id' => $legacyEmployee->id,
                 ], [
-                    'nip' => $legacyEmployee->nip,
+                    'nip' => $nip,
                     'sikkepo_pegawai_id' => $pegawaiId,
                     'employee_snapshot' => json_encode($employee, JSON_THROW_ON_ERROR),
                     'updated_at' => now(),
@@ -111,6 +139,19 @@ class LegacyPerjadinMappingService
 
             $report['employees_mapped']++;
         }
+    }
+
+    private function hasEmployeeMapping(int $legacyEmployeeId): bool
+    {
+        return DB::table('legacy_employee_mappings')
+            ->where('source_database', $this->sourceDatabase)
+            ->where('legacy_employee_id', $legacyEmployeeId)
+            ->exists();
+    }
+
+    private function hasUsableNip(string $nip): bool
+    {
+        return ! in_array($nip, ['', '-', '--'], true);
     }
 
     /**

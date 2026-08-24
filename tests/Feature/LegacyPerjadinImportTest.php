@@ -163,6 +163,78 @@ class LegacyPerjadinImportTest extends TestCase
         ]);
     }
 
+    public function test_mapping_preparation_can_limit_lookups_to_unmapped_valid_nips(): void
+    {
+        config([
+            'sikkepo.base_url' => 'https://sikkepo.test',
+            'sikkepo.platform_client_id' => 'perjadin',
+            'sikkepo.platform_client_secret' => 'secret',
+            'perjadin.legacy_import.mapping_delay_ms' => 0,
+        ]);
+        Cache::forget(config('sikkepo.token_cache_key'));
+
+        DB::table('legacy_employee_mappings')->insert([
+            'source_database' => $this->legacyDatabasePath,
+            'legacy_employee_id' => 1,
+            'nip' => '198001012010011001',
+            'sikkepo_pegawai_id' => '10000000-0000-4000-8000-000000000001',
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+        DB::connection('legacy')->table('pegawai')->insert([
+            'id' => 3,
+            'nip' => '--',
+            'nama' => 'NIP Placeholder',
+            'record' => '2024-01-10 08:00:00',
+            'id_jabatan' => 1,
+            'id_golru' => 1,
+            'id_eselon' => 1,
+            'id_unit' => 10,
+        ]);
+        DB::connection('legacy')->table('perjadin_sppd_pengikut')->insert([
+            'id' => 1,
+            'id_sppd' => 1,
+            'id_pegawai' => 3,
+        ]);
+
+        Http::fake([
+            'https://sikkepo.test/api/v1/platform/token' => Http::response([
+                'access_token' => 'platform-token',
+            ]),
+            'https://sikkepo.test/api/v1/platform/pegawai*' => Http::response([
+                'data' => [[
+                    'pegawai_id' => '10000000-0000-4000-8000-000000000002',
+                    'nip' => '198001012010011002',
+                    'nama' => 'Pegawai SIKKEPO',
+                    'aktif' => true,
+                ]],
+            ]),
+        ]);
+
+        $report = app(LegacyPerjadinMappingService::class)->prepare(
+            dryRun: false,
+            employees: true,
+            units: false,
+            unmappedOnly: true,
+            validNipsOnly: true
+        );
+
+        $this->assertSame(1, $report['employees_mapped']);
+        $this->assertSame(0, $report['employees_unresolved']);
+        $this->assertSame(0, $report['employees_upstream_failed']);
+        $this->assertDatabaseCount('legacy_employee_mappings', 2);
+        Http::assertSent(function (Request $request): bool {
+            parse_str((string) parse_url($request->url(), PHP_URL_QUERY), $query);
+
+            return str_starts_with($request->url(), 'https://sikkepo.test/api/v1/platform/pegawai')
+                && ($query['nip'] ?? null) === '198001012010011002';
+        });
+        Http::assertNotSent(function (Request $request): bool {
+            return str_contains($request->url(), 'nip=198001012010011001')
+                || str_contains($request->url(), 'nip=--');
+        });
+    }
+
     private function createLegacySchema(): void
     {
         Schema::connection('legacy')->create('pegawai', function ($table) {

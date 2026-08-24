@@ -11,7 +11,9 @@ class PrepareLegacyPerjadinMappingsCommand extends Command
     protected $signature = 'perjadin:prepare-legacy-mappings
                             {--dry-run : Cocokkan data tanpa menyimpan mapping}
                             {--employees : Proses hanya mapping pegawai}
-                            {--units : Proses hanya mapping unit}';
+                            {--units : Proses hanya mapping unit}
+                            {--unmapped-only : Lewati pegawai yang sudah memiliki mapping}
+                            {--valid-nips-only : Proses hanya NIP yang bukan kosong atau placeholder}';
 
     protected $description = 'Siapkan mapping pegawai dan unit legacy terhadap referensi SIKKEPO';
 
@@ -29,7 +31,9 @@ class PrepareLegacyPerjadinMappingsCommand extends Command
             $report = $mappings->prepare(
                 dryRun: (bool) $this->option('dry-run'),
                 employees: $employees,
-                units: $units
+                units: $units,
+                unmappedOnly: (bool) $this->option('unmapped-only'),
+                validNipsOnly: (bool) $this->option('valid-nips-only')
             );
         } catch (Throwable $exception) {
             report($exception);
