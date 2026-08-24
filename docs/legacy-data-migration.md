@@ -23,7 +23,14 @@ Sebelum migrasi, ambil backup konsisten database Perjadin terbaru yang sedang ak
 
 ## Mapping Wajib
 
-Importer tidak mengarang UUID SIKKEPO. Lengkapi tabel berikut sebelum menjalankan import nyata:
+Importer tidak mengarang UUID SIKKEPO. Siapkan mapping otomatis terlebih dahulu:
+
+```bash
+php artisan perjadin:prepare-legacy-mappings --dry-run
+php artisan perjadin:prepare-legacy-mappings
+```
+
+Resolver hanya menyimpan kecocokan NIP pegawai dan nama atau kode unit yang persis satu hasil. Lengkapi atau koreksi tabel berikut secara manual untuk data yang tetap belum cocok:
 
 - `legacy_unit_mappings`: `source_database`, `legacy_unit_id`, `sikkepo_unit_id`.
 - `legacy_employee_mappings`: `source_database`, `legacy_employee_id`, `nip`, `sikkepo_pegawai_id`, dan snapshot SIKKEPO bila tersedia.

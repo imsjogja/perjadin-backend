@@ -4,8 +4,12 @@ namespace Tests\Feature;
 
 use App\Models\LegacyImportRecord;
 use App\Services\LegacyPerjadinImportService;
+use App\Services\LegacyPerjadinMappingService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\Client\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Schema;
 use Tests\TestCase;
 
@@ -115,6 +119,57 @@ class LegacyPerjadinImportTest extends TestCase
         );
     }
 
+    public function test_mapping_preparation_only_persists_exact_sikkepo_matches(): void
+    {
+        config([
+            'sikkepo.base_url' => 'https://sikkepo.test',
+            'sikkepo.platform_client_id' => 'perjadin',
+            'sikkepo.platform_client_secret' => 'secret',
+        ]);
+        Cache::forget(config('sikkepo.token_cache_key'));
+
+        Http::fake([
+            'https://sikkepo.test/api/v1/platform/token' => Http::response([
+                'access_token' => 'platform-token',
+            ]),
+            'https://sikkepo.test/api/v1/platform/pegawai*' => function (Request $request) {
+                parse_str((string) parse_url($request->url(), PHP_URL_QUERY), $query);
+                $nip = $query['nip'] ?? '';
+                $employeeId = $nip === '198001012010011001'
+                    ? '10000000-0000-4000-8000-000000000001'
+                    : '10000000-0000-4000-8000-000000000002';
+
+                return Http::response([
+                    'data' => [[
+                        'pegawai_id' => $employeeId,
+                        'nip' => $nip,
+                        'nama' => 'Pegawai SIKKEPO',
+                        'aktif' => true,
+                    ]],
+                ]);
+            },
+            'https://sikkepo.test/api/v1/data/unit*' => Http::response([
+                'data' => [[
+                    'id' => '20000000-0000-4000-8000-000000000010',
+                    'kode' => 'BKD',
+                    'nama' => 'Badan Kepegawaian Daerah',
+                ]],
+            ]),
+        ]);
+
+        $report = app(LegacyPerjadinMappingService::class)->prepare(dryRun: false);
+
+        $this->assertSame(2, $report['employees_mapped']);
+        $this->assertSame(0, $report['employees_unresolved']);
+        $this->assertSame(1, $report['units_mapped']);
+        $this->assertSame(0, $report['units_unresolved']);
+        $this->assertDatabaseCount('legacy_employee_mappings', 2);
+        $this->assertDatabaseHas('legacy_unit_mappings', [
+            'legacy_unit_id' => 10,
+            'sikkepo_unit_id' => '20000000-0000-4000-8000-000000000010',
+        ]);
+    }
+
     private function createLegacySchema(): void
     {
         Schema::connection('legacy')->create('pegawai', function ($table) {
@@ -129,6 +184,7 @@ class LegacyPerjadinImportTest extends TestCase
         });
         Schema::connection('legacy')->create('ref_unit', function ($table) {
             $table->integer('id')->primary();
+            $table->string('kode')->nullable();
             $table->string('unit');
         });
         Schema::connection('legacy')->create('ref_jabatan', function ($table) {
@@ -216,6 +272,7 @@ class LegacyPerjadinImportTest extends TestCase
     {
         DB::connection('legacy')->table('ref_unit')->insert([
             'id' => 10,
+            'kode' => 'BKD',
             'unit' => 'Badan Kepegawaian Daerah',
         ]);
         DB::connection('legacy')->table('ref_jabatan')->insert([
