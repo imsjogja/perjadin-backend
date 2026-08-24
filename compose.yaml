@@ -6,7 +6,7 @@ services:
       context: .
       dockerfile: Dockerfile
     env_file:
-      - .env.local
+      - .env
     extra_hosts:
       - "ims-db-tunnel:${IMS_DB_TUNNEL_GATEWAY:-172.25.0.1}"
 
