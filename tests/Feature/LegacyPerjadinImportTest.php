@@ -1,0 +1,318 @@
+<?php
+
+namespace Tests\Feature;
+
+use App\Models\LegacyImportRecord;
+use App\Services\LegacyPerjadinImportService;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
+use Tests\TestCase;
+
+class LegacyPerjadinImportTest extends TestCase
+{
+    use RefreshDatabase;
+
+    private string $legacyDatabasePath;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $this->legacyDatabasePath = tempnam(sys_get_temp_dir(), 'perjadin-legacy-');
+        config([
+            'database.connections.legacy' => [
+                'driver' => 'sqlite',
+                'database' => $this->legacyDatabasePath,
+                'prefix' => '',
+                'foreign_key_constraints' => true,
+            ],
+            'perjadin.legacy_import.connection' => 'legacy',
+        ]);
+        DB::purge('legacy');
+
+        $this->createLegacySchema();
+        $this->seedLegacyDocument();
+    }
+
+    protected function tearDown(): void
+    {
+        DB::disconnect('legacy');
+
+        if (isset($this->legacyDatabasePath) && file_exists($this->legacyDatabasePath)) {
+            unlink($this->legacyDatabasePath);
+        }
+
+        parent::tearDown();
+    }
+
+    public function test_dry_run_quarantines_unmapped_rows_without_writing_target_data(): void
+    {
+        $report = app(LegacyPerjadinImportService::class)->import(dryRun: true);
+
+        $this->assertSame(2, $report['quarantined']);
+        $this->assertDatabaseCount('spts', 0);
+        $this->assertDatabaseCount('sppds', 0);
+        $this->assertDatabaseCount('legacy_import_records', 0);
+    }
+
+    public function test_import_creates_documents_from_mapped_legacy_data_and_is_idempotent(): void
+    {
+        DB::table('legacy_unit_mappings')->insert([
+            'source_database' => $this->legacyDatabasePath,
+            'legacy_unit_id' => 10,
+            'sikkepo_unit_id' => '20000000-0000-4000-8000-000000000010',
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+        DB::table('legacy_employee_mappings')->insert([
+            [
+                'source_database' => $this->legacyDatabasePath,
+                'legacy_employee_id' => 1,
+                'nip' => '198001012010011001',
+                'sikkepo_pegawai_id' => '10000000-0000-4000-8000-000000000001',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'source_database' => $this->legacyDatabasePath,
+                'legacy_employee_id' => 2,
+                'nip' => '198001012010011002',
+                'sikkepo_pegawai_id' => '10000000-0000-4000-8000-000000000002',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+        ]);
+
+        $firstReport = app(LegacyPerjadinImportService::class)->import(dryRun: false);
+
+        $this->assertSame(1, $firstReport['spts_imported']);
+        $this->assertSame(1, $firstReport['sppds_imported']);
+        $this->assertSame(0, $firstReport['quarantined']);
+        $this->assertDatabaseHas('spts', [
+            'document_number' => '090.1/001/BKD/2024',
+            'unit_id' => '20000000-0000-4000-8000-000000000010',
+        ]);
+        $this->assertDatabaseHas('sppds', [
+            'document_number' => '094/001/BKD/2024',
+            'status' => 'verified',
+        ]);
+        $this->assertDatabaseCount('spt_assignees', 1);
+        $this->assertDatabaseCount('legacy_import_records', 2);
+
+        $secondReport = app(LegacyPerjadinImportService::class)->import(dryRun: false);
+
+        $this->assertSame(1, $secondReport['spts_skipped']);
+        $this->assertSame(1, $secondReport['sppds_skipped']);
+        $this->assertDatabaseCount('spts', 1);
+        $this->assertDatabaseCount('sppds', 1);
+        $this->assertDatabaseCount('legacy_import_records', 2);
+        $this->assertSame(
+            LegacyImportRecord::STATUS_IMPORTED,
+            LegacyImportRecord::query()
+                ->where('source_table', 'perjadin_sppd')
+                ->value('status')
+        );
+    }
+
+    private function createLegacySchema(): void
+    {
+        Schema::connection('legacy')->create('pegawai', function ($table) {
+            $table->integer('id')->primary();
+            $table->string('nip');
+            $table->string('nama');
+            $table->timestamp('record')->nullable();
+            $table->integer('id_jabatan')->nullable();
+            $table->integer('id_golru')->nullable();
+            $table->integer('id_eselon')->nullable();
+            $table->integer('id_unit')->nullable();
+        });
+        Schema::connection('legacy')->create('ref_unit', function ($table) {
+            $table->integer('id')->primary();
+            $table->string('unit');
+        });
+        Schema::connection('legacy')->create('ref_jabatan', function ($table) {
+            $table->integer('id')->primary();
+            $table->string('jabatan');
+        });
+        Schema::connection('legacy')->create('ref_golru', function ($table) {
+            $table->integer('id')->primary();
+            $table->string('golongan');
+            $table->string('pangkat');
+        });
+        Schema::connection('legacy')->create('ref_eselon', function ($table) {
+            $table->integer('id')->primary();
+            $table->string('eselon');
+        });
+        Schema::connection('legacy')->create('ref_transportasi', function ($table) {
+            $table->integer('id')->primary();
+            $table->string('transportasi');
+        });
+        Schema::connection('legacy')->create('perjadin_spt', function ($table) {
+            $table->integer('id')->primary();
+            $table->string('no_registrasi');
+            $table->string('no_spt');
+            $table->string('dasar')->nullable();
+            $table->string('disposisi')->nullable();
+            $table->text('dalam_rangka')->nullable();
+            $table->timestamp('record')->nullable();
+            $table->string('no_spt_text');
+            $table->string('tempat_dikeluarkan');
+            $table->date('tanggal');
+            $table->integer('id_unit');
+        });
+        Schema::connection('legacy')->create('perjadin_spt_tujuan', function ($table) {
+            $table->integer('id')->primary();
+            $table->integer('id_spt');
+            $table->string('tempat_berangkat');
+            $table->string('tempat_tujuan');
+            $table->integer('id_transportasi');
+            $table->integer('lamanya');
+        });
+        Schema::connection('legacy')->create('perjadin_spt_pejabat', function ($table) {
+            $table->integer('id')->primary();
+            $table->integer('id_spt');
+            $table->integer('id_pegawai');
+            $table->string('atas_nama')->nullable();
+            $table->string('pejabat')->nullable();
+            $table->string('pejabat_sementara')->nullable();
+        });
+        Schema::connection('legacy')->create('perjadin_sppd', function ($table) {
+            $table->integer('id')->primary();
+            $table->integer('id_spt');
+            $table->integer('id_pegawai');
+            $table->string('no_registrasi');
+            $table->string('no_sppd');
+            $table->string('pj_tingkat')->nullable();
+            $table->string('pj_jenis')->nullable();
+            $table->date('pj_tgl_berangkat')->nullable();
+            $table->date('pj_tgl_kembali')->nullable();
+            $table->string('ba_instansi')->nullable();
+            $table->string('ba_mata_anggaran')->nullable();
+            $table->text('keterangan')->nullable();
+            $table->string('verifikasi')->nullable();
+            $table->timestamp('record')->nullable();
+            $table->string('no_sppd_text');
+            $table->string('pemberi_perintah');
+            $table->string('tempat_dikeluarkan');
+            $table->date('tanggal');
+        });
+        Schema::connection('legacy')->create('perjadin_sppd_pengikut', function ($table) {
+            $table->integer('id')->primary();
+            $table->integer('id_sppd');
+            $table->integer('id_pegawai');
+        });
+        Schema::connection('legacy')->create('perjadin_sppd_pejabat', function ($table) {
+            $table->integer('id')->primary();
+            $table->integer('id_sppd');
+            $table->integer('id_pegawai');
+            $table->string('atas_nama')->nullable();
+            $table->string('pejabat')->nullable();
+            $table->string('pejabat_sementara')->nullable();
+        });
+    }
+
+    private function seedLegacyDocument(): void
+    {
+        DB::connection('legacy')->table('ref_unit')->insert([
+            'id' => 10,
+            'unit' => 'Badan Kepegawaian Daerah',
+        ]);
+        DB::connection('legacy')->table('ref_jabatan')->insert([
+            'id' => 1,
+            'jabatan' => 'Kepala BKD',
+        ]);
+        DB::connection('legacy')->table('ref_golru')->insert([
+            'id' => 1,
+            'golongan' => 'III/a',
+            'pangkat' => 'Penata Muda',
+        ]);
+        DB::connection('legacy')->table('ref_eselon')->insert([
+            'id' => 1,
+            'eselon' => 'II.b',
+        ]);
+        DB::connection('legacy')->table('ref_transportasi')->insert([
+            'id' => 1,
+            'transportasi' => 'Pesawat',
+        ]);
+        DB::connection('legacy')->table('pegawai')->insert([
+            [
+                'id' => 1,
+                'nip' => '198001012010011001',
+                'nama' => 'Pejabat Penandatangan',
+                'record' => '2024-01-10 08:00:00',
+                'id_jabatan' => 1,
+                'id_golru' => 1,
+                'id_eselon' => 1,
+                'id_unit' => 10,
+            ],
+            [
+                'id' => 2,
+                'nip' => '198001012010011002',
+                'nama' => 'Pelaksana Perjalanan',
+                'record' => '2024-01-10 08:00:00',
+                'id_jabatan' => 1,
+                'id_golru' => 1,
+                'id_eselon' => 1,
+                'id_unit' => 10,
+            ],
+        ]);
+        DB::connection('legacy')->table('perjadin_spt')->insert([
+            'id' => 1,
+            'no_registrasi' => '00001',
+            'no_spt' => '001',
+            'dasar' => 'Surat undangan',
+            'disposisi' => 'Segera',
+            'dalam_rangka' => 'Koordinasi',
+            'record' => '2024-01-10 08:00:00',
+            'no_spt_text' => '090.1/001/BKD/2024',
+            'tempat_dikeluarkan' => 'Manokwari',
+            'tanggal' => '2024-01-10',
+            'id_unit' => 10,
+        ]);
+        DB::connection('legacy')->table('perjadin_spt_tujuan')->insert([
+            'id' => 1,
+            'id_spt' => 1,
+            'tempat_berangkat' => 'Manokwari',
+            'tempat_tujuan' => 'Jakarta',
+            'id_transportasi' => 1,
+            'lamanya' => 3,
+        ]);
+        DB::connection('legacy')->table('perjadin_spt_pejabat')->insert([
+            'id' => 1,
+            'id_spt' => 1,
+            'id_pegawai' => 1,
+            'atas_nama' => 'a.n. Gubernur',
+            'pejabat' => 'KABAN',
+            'pejabat_sementara' => null,
+        ]);
+        DB::connection('legacy')->table('perjadin_sppd')->insert([
+            'id' => 1,
+            'id_spt' => 1,
+            'id_pegawai' => 2,
+            'no_registrasi' => '00001',
+            'no_sppd' => '001',
+            'pj_tingkat' => 'B',
+            'pj_jenis' => 'Luar Daerah',
+            'pj_tgl_berangkat' => '2024-01-12',
+            'pj_tgl_kembali' => '2024-01-14',
+            'ba_instansi' => 'BKD',
+            'ba_mata_anggaran' => '5.1.02',
+            'keterangan' => 'Rapat koordinasi',
+            'verifikasi' => '1',
+            'record' => '2024-01-10 08:00:00',
+            'no_sppd_text' => '094/001/BKD/2024',
+            'pemberi_perintah' => 'Kepala BKD',
+            'tempat_dikeluarkan' => 'Manokwari',
+            'tanggal' => '2024-01-10',
+        ]);
+        DB::connection('legacy')->table('perjadin_sppd_pejabat')->insert([
+            'id' => 1,
+            'id_sppd' => 1,
+            'id_pegawai' => 1,
+            'atas_nama' => 'a.n. Gubernur',
+            'pejabat' => 'KABAN',
+            'pejabat_sementara' => null,
+        ]);
+    }
+}

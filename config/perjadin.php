@@ -52,4 +52,8 @@ return [
         'email' => env('PERJADIN_ADMIN_EMAIL', 'admin@perjadin.local'),
         'password' => env('PERJADIN_ADMIN_PASSWORD', 'password'),
     ],
+
+    'legacy_import' => [
+        'connection' => env('PERJADIN_LEGACY_CONNECTION', 'legacy'),
+    ],
 ];
