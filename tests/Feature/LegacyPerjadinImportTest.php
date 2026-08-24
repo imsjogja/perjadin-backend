@@ -62,31 +62,7 @@ class LegacyPerjadinImportTest extends TestCase
 
     public function test_import_creates_documents_from_mapped_legacy_data_and_is_idempotent(): void
     {
-        DB::table('legacy_unit_mappings')->insert([
-            'source_database' => $this->legacyDatabasePath,
-            'legacy_unit_id' => 10,
-            'sikkepo_unit_id' => '20000000-0000-4000-8000-000000000010',
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);
-        DB::table('legacy_employee_mappings')->insert([
-            [
-                'source_database' => $this->legacyDatabasePath,
-                'legacy_employee_id' => 1,
-                'nip' => '198001012010011001',
-                'sikkepo_pegawai_id' => '10000000-0000-4000-8000-000000000001',
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-            [
-                'source_database' => $this->legacyDatabasePath,
-                'legacy_employee_id' => 2,
-                'nip' => '198001012010011002',
-                'sikkepo_pegawai_id' => '10000000-0000-4000-8000-000000000002',
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-        ]);
+        $this->seedMappings();
 
         $firstReport = app(LegacyPerjadinImportService::class)->import(dryRun: false);
 
@@ -117,6 +93,20 @@ class LegacyPerjadinImportTest extends TestCase
                 ->where('source_table', 'perjadin_sppd')
                 ->value('status')
         );
+    }
+
+    public function test_dry_run_simulates_importable_parent_spts_for_sppds_without_writing(): void
+    {
+        $this->seedMappings();
+
+        $report = app(LegacyPerjadinImportService::class)->import(dryRun: true);
+
+        $this->assertSame(1, $report['spts_imported']);
+        $this->assertSame(1, $report['sppds_imported']);
+        $this->assertSame(0, $report['quarantined']);
+        $this->assertDatabaseCount('spts', 0);
+        $this->assertDatabaseCount('sppds', 0);
+        $this->assertDatabaseCount('legacy_import_records', 0);
     }
 
     public function test_mapping_preparation_only_persists_exact_sikkepo_matches(): void
@@ -373,6 +363,35 @@ class LegacyPerjadinImportTest extends TestCase
             'atas_nama' => 'a.n. Gubernur',
             'pejabat' => 'KABAN',
             'pejabat_sementara' => null,
+        ]);
+    }
+
+    private function seedMappings(): void
+    {
+        DB::table('legacy_unit_mappings')->insert([
+            'source_database' => $this->legacyDatabasePath,
+            'legacy_unit_id' => 10,
+            'sikkepo_unit_id' => '20000000-0000-4000-8000-000000000010',
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+        DB::table('legacy_employee_mappings')->insert([
+            [
+                'source_database' => $this->legacyDatabasePath,
+                'legacy_employee_id' => 1,
+                'nip' => '198001012010011001',
+                'sikkepo_pegawai_id' => '10000000-0000-4000-8000-000000000001',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'source_database' => $this->legacyDatabasePath,
+                'legacy_employee_id' => 2,
+                'nip' => '198001012010011002',
+                'sikkepo_pegawai_id' => '10000000-0000-4000-8000-000000000002',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
         ]);
     }
 }

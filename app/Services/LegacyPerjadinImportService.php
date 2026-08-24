@@ -29,6 +29,9 @@ class LegacyPerjadinImportService
     /** @var array<int, string|null> */
     private array $unitMappings = [];
 
+    /** @var array<int, bool> */
+    private array $dryRunImportableSptIds = [];
+
     public function __construct()
     {
         $this->sourceConnection = (string) config('perjadin.legacy_import.connection', 'legacy');
@@ -43,6 +46,8 @@ class LegacyPerjadinImportService
      */
     public function import(bool $dryRun = true, ?int $limit = null): array
     {
+        $this->dryRunImportableSptIds = [];
+
         $report = [
             'references' => 0,
             'spts_imported' => 0,
@@ -291,6 +296,7 @@ class LegacyPerjadinImportService
             }
 
             if ($dryRun) {
+                $this->dryRunImportableSptIds[$sourceId] = true;
                 $report['spts_imported']++;
 
                 continue;
@@ -396,7 +402,9 @@ class LegacyPerjadinImportService
                 continue;
             }
 
-            $targetSptId = $this->targetIdFor('perjadin_spt', (int) $legacySppd->id_spt);
+            $targetSptId = $dryRun && isset($this->dryRunImportableSptIds[(int) $legacySppd->id_spt])
+                ? 'dry-run'
+                : $this->targetIdFor('perjadin_spt', (int) $legacySppd->id_spt);
             if (! $targetSptId) {
                 $this->quarantine(
                     $batch,
