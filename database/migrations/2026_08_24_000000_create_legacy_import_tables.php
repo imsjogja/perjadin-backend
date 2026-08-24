@@ -33,8 +33,11 @@ return new class extends Migration
             $table->text('message')->nullable();
             $table->timestamps();
 
-            $table->index('batch_id');
-            $table->unique(['source_database', 'source_table', 'source_id']);
+            $table->index('batch_id', 'legacy_import_records_batch_index');
+            $table->unique(
+                ['source_database', 'source_table', 'source_id'],
+                'legacy_import_source_row_unique'
+            );
         });
 
         Schema::create('legacy_import_issues', function (Blueprint $table) {
@@ -49,8 +52,8 @@ return new class extends Migration
             $table->json('payload')->nullable();
             $table->timestamps();
 
-            $table->index(['batch_id', 'code']);
-            $table->index(['source_table', 'source_id']);
+            $table->index(['batch_id', 'code'], 'legacy_import_issues_batch_code_index');
+            $table->index(['source_table', 'source_id'], 'legacy_import_issues_source_row_index');
         });
 
         Schema::create('legacy_unit_mappings', function (Blueprint $table) {
@@ -61,7 +64,10 @@ return new class extends Migration
             $table->json('unit_snapshot')->nullable();
             $table->timestamps();
 
-            $table->unique(['source_database', 'legacy_unit_id']);
+            $table->unique(
+                ['source_database', 'legacy_unit_id'],
+                'legacy_unit_mappings_source_unit_unique'
+            );
         });
 
         Schema::create('legacy_employee_mappings', function (Blueprint $table) {
@@ -73,8 +79,11 @@ return new class extends Migration
             $table->json('employee_snapshot')->nullable();
             $table->timestamps();
 
-            $table->unique(['source_database', 'legacy_employee_id']);
-            $table->index(['source_database', 'nip']);
+            $table->unique(
+                ['source_database', 'legacy_employee_id'],
+                'legacy_employee_mappings_source_employee_unique'
+            );
+            $table->index(['source_database', 'nip'], 'legacy_employee_mappings_source_nip_index');
         });
     }
 
