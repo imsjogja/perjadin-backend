@@ -28,8 +28,10 @@ class LegacyPerjadinMappingService
         $report = [
             'employees_mapped' => 0,
             'employees_unresolved' => 0,
+            'employees_upstream_failed' => 0,
             'units_mapped' => 0,
             'units_unresolved' => 0,
+            'units_upstream_failed' => 0,
         ];
 
         if ($employees) {
@@ -68,6 +70,8 @@ class LegacyPerjadinMappingService
                 continue;
             }
 
+            $this->pauseBetweenLookups();
+
             try {
                 $payload = $this->sikkepo->pegawai([
                     'nip' => (string) $legacyEmployee->nip,
@@ -75,7 +79,7 @@ class LegacyPerjadinMappingService
                 ]);
             } catch (SikkepoPlatformException $exception) {
                 report($exception);
-                $report['employees_unresolved']++;
+                $report['employees_upstream_failed']++;
 
                 continue;
             }
@@ -121,6 +125,8 @@ class LegacyPerjadinMappingService
             ->get(['unit.id', 'unit.kode', 'unit.unit']);
 
         foreach ($units as $legacyUnit) {
+            $this->pauseBetweenLookups();
+
             try {
                 $payload = $this->sikkepo->units([
                     'q' => (string) $legacyUnit->unit,
@@ -128,7 +134,7 @@ class LegacyPerjadinMappingService
                 ]);
             } catch (SikkepoPlatformException $exception) {
                 report($exception);
-                $report['units_unresolved']++;
+                $report['units_upstream_failed']++;
 
                 continue;
             }
@@ -169,6 +175,15 @@ class LegacyPerjadinMappingService
             }
 
             $report['units_mapped']++;
+        }
+    }
+
+    private function pauseBetweenLookups(): void
+    {
+        $delay = max(0, (int) config('perjadin.legacy_import.mapping_delay_ms', 1000));
+
+        if ($delay > 0) {
+            usleep($delay * 1000);
         }
     }
 }

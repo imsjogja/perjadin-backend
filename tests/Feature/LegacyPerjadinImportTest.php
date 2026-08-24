@@ -125,6 +125,7 @@ class LegacyPerjadinImportTest extends TestCase
             'sikkepo.base_url' => 'https://sikkepo.test',
             'sikkepo.platform_client_id' => 'perjadin',
             'sikkepo.platform_client_secret' => 'secret',
+            'perjadin.legacy_import.mapping_delay_ms' => 0,
         ]);
         Cache::forget(config('sikkepo.token_cache_key'));
 
@@ -161,8 +162,10 @@ class LegacyPerjadinImportTest extends TestCase
 
         $this->assertSame(2, $report['employees_mapped']);
         $this->assertSame(0, $report['employees_unresolved']);
+        $this->assertSame(0, $report['employees_upstream_failed']);
         $this->assertSame(1, $report['units_mapped']);
         $this->assertSame(0, $report['units_unresolved']);
+        $this->assertSame(0, $report['units_upstream_failed']);
         $this->assertDatabaseCount('legacy_employee_mappings', 2);
         $this->assertDatabaseHas('legacy_unit_mappings', [
             'legacy_unit_id' => 10,

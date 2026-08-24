@@ -39,6 +39,8 @@ Nilai `source_database` harus sama dengan nilai `LEGACY_DB_DATABASE`, yaitu `per
 
 Pegawai atau unit tanpa mapping masuk karantina dan tidak membuat dokumen target. Mapping harus disetujui berdasarkan NIP dan referensi unit SIKKEPO, termasuk pegawai historis yang kini tidak aktif.
 
+Resolver memberi jeda satu detik setiap lookup melalui `PERJADIN_LEGACY_MAPPING_DELAY_MS` agar tidak melampaui batas SIKKEPO. Tinjau kolom kegagalan upstream sebelum menganggap data tidak cocok.
+
 ## Menjalankan Import
 
 Validasi tanpa menulis data:

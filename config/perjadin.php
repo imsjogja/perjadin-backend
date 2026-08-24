@@ -55,5 +55,6 @@ return [
 
     'legacy_import' => [
         'connection' => env('PERJADIN_LEGACY_CONNECTION', 'legacy'),
+        'mapping_delay_ms' => (int) env('PERJADIN_LEGACY_MAPPING_DELAY_MS', 1000),
     ],
 ];

@@ -43,8 +43,10 @@ class PrepareLegacyPerjadinMappingsCommand extends Command
             [
                 ['Pegawai termapping', $report['employees_mapped']],
                 ['Pegawai belum cocok', $report['employees_unresolved']],
+                ['Gagal hubungi SIKKEPO (pegawai)', $report['employees_upstream_failed']],
                 ['Unit termapping', $report['units_mapped']],
                 ['Unit belum cocok', $report['units_unresolved']],
+                ['Gagal hubungi SIKKEPO (unit)', $report['units_upstream_failed']],
             ]
         );
 
