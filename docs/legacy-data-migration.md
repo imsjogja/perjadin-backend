@@ -83,6 +83,24 @@ Dokumen yang sudah terimpor tidak diperbarui otomatis apabila sumber legacy beru
 
 `verifikasi=1` dimigrasikan menjadi `verified`; nilai lain menjadi `draft`. Nomor registrasi dan nomor dokumen harus unik per tahun sesuai constraint target. Konflik nomor, data pegawai hilang, atau metadata dokumen tidak valid masuk karantina.
 
+## Audit Kesiapan Import
+
+Hasil audit pada **24 Agustus 2026** terhadap sumber `perjadin-pabar` dan target kosong
+`perjadin_v2`:
+
+- Resolver berhasil menyimpan 56 dari 189 mapping pegawai dan 1 dari 2 mapping unit.
+- Tidak ada kegagalan koneksi SIKKEPO selama resolver terakhir.
+- Satu pegawai sumber (`id=264`) tidak ditemukan atau tidak memiliki NIP pada database legacy.
+- Unit legacy `id=3` (`SEKRETARIAT DAERAH`) belum memiliki satu kecocokan SIKKEPO yang pasti.
+- Dry-run pada revisi `94016c6` menemukan 366 SPT dan 537 SPPD siap diimpor.
+- Sebanyak 927 dokumen masih dikarantina: 218 SPT penandatangan belum mapped, 396 SPPD
+  mengikuti SPT induk yang tertahan, 239 SPPD pelaksana/penandatangan belum mapped, dan 73
+  SPPD memiliki pengikut belum mapped.
+
+Jangan jalankan import riil sebelum unit dan mapping pegawai historis ditinjau serta disetujui.
+Ulangi resolver dan dry-run setelah mapping dilengkapi; hasil dry-run harus menjadi dasar
+persetujuan import riil.
+
 ## Validasi dan Cutover
 
 1. Bandingkan jumlah SPT, SPPD, pengikut, dan referensi dengan sumber.
