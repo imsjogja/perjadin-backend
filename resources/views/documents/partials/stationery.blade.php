@@ -1,4 +1,8 @@
-<table @class(['kop', 'kop-'.$documentType])>
+<table @class([
+    'kop',
+    'kop-'.$documentType,
+    'kop-with-logo' => ! empty($stationery['logo_data_uri']),
+])>
     <tr>
         @if(! empty($stationery['logo_data_uri']))
             <td class="kop-logo"><img src="{{ $stationery['logo_data_uri'] }}" alt="Logo instansi"></td>
