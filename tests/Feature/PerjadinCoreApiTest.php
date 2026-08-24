@@ -71,6 +71,36 @@ class PerjadinCoreApiTest extends TestCase
             ->assertJsonPath('data.0.id', $unassignedSpt['id']);
     }
 
+    public function test_spt_list_paginates_and_supports_table_search_and_sorting(): void
+    {
+        $this->fakeSikkepo();
+        Sanctum::actingAs(User::factory()->create());
+
+        $oldestSpt = $this->postJson('/api/v1/spts', $this->sptPayload([
+            'dalam_rangka' => 'Rapat koordinasi pertama',
+            'issued_date' => '2026-08-20',
+        ]))->json('data');
+        $this->postJson('/api/v1/spts', $this->sptPayload([
+            'dalam_rangka' => 'Rapat koordinasi kedua',
+            'issued_date' => '2026-08-21',
+        ]))->assertCreated();
+        $this->postJson('/api/v1/spts', $this->sptPayload([
+            'dalam_rangka' => 'Rapat koordinasi ketiga',
+            'issued_date' => '2026-08-22',
+        ]))->assertCreated();
+
+        $this->getJson('/api/v1/spts?q=Rapat&per_page=2&page=2&sort=issued_date&direction=desc')
+            ->assertOk()
+            ->assertJsonPath('current_page', 2)
+            ->assertJsonPath('last_page', 2)
+            ->assertJsonPath('per_page', 2)
+            ->assertJsonPath('total', 3)
+            ->assertJsonPath('from', 3)
+            ->assertJsonPath('to', 3)
+            ->assertJsonCount(1, 'data')
+            ->assertJsonPath('data.0.id', $oldestSpt['id']);
+    }
+
     public function test_spt_without_sppd_can_be_deleted_but_spt_with_sppd_is_preserved(): void
     {
         $this->fakeSikkepo();

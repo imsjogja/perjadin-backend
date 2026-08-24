@@ -19,6 +19,9 @@ class SptController extends Controller
         $filters = $request->validate([
             'year' => ['nullable', 'integer', 'min:2000', 'max:2100'],
             'per_page' => ['nullable', 'integer', 'min:1', 'max:100'],
+            'q' => ['nullable', 'string', 'max:150'],
+            'sort' => ['nullable', 'in:document_number,issued_date,assignee_count'],
+            'direction' => ['nullable', 'in:asc,desc'],
             'date_from' => ['nullable', 'date'],
             'date_to' => ['nullable', 'date', 'after_or_equal:date_from'],
             'assignee_id' => ['nullable', 'uuid'],
@@ -27,9 +30,7 @@ class SptController extends Controller
 
         $query = Spt::query()
             ->with(['bases', 'destination', 'signatory'])
-            ->withCount(['assignees', 'sppds'])
-            ->orderByDesc('issued_date')
-            ->orderByDesc('sequence_number');
+            ->withCount(['assignees', 'sppds']);
 
         if (isset($filters['year'])) {
             $query->where('document_year', $filters['year']);
@@ -60,6 +61,29 @@ class SptController extends Controller
         if (($filters['status'] ?? null) === 'ready') {
             $query->whereNull('archived_at')->has('assignees');
         }
+
+        if (filled($filters['q'] ?? null)) {
+            $keyword = '%'.trim($filters['q']).'%';
+
+            $query->where(function ($query) use ($keyword) {
+                $query->where('document_number', 'like', $keyword)
+                    ->orWhere('dalam_rangka', 'like', $keyword)
+                    ->orWhere('issued_place', 'like', $keyword)
+                    ->orWhereHas('destination', function ($destination) use ($keyword) {
+                        $destination->where('destination_place', 'like', $keyword);
+                    });
+            });
+        }
+
+        $sort = $filters['sort'] ?? 'issued_date';
+        $direction = $filters['direction'] ?? 'desc';
+
+        match ($sort) {
+            'document_number' => $query->orderBy('document_number', $direction),
+            'assignee_count' => $query->orderBy('assignees_count', $direction),
+            default => $query->orderBy('issued_date', $direction),
+        };
+        $query->orderBy('sequence_number', $direction);
 
         return response()->json($query->paginate($filters['per_page'] ?? 25));
     }
