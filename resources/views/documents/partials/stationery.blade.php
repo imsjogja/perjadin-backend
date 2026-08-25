@@ -12,6 +12,9 @@
             <h2 class="kop-agency">{{ $useSecretariat ? $stationery['secretariat'] : $stationery['agency'] }}</h2>
             <span class="kop-address">{{ $stationery['address'] }} - {{ $stationery['city'] }}</span>
         </td>
+        @if(! empty($stationery['logo_data_uri']))
+            <td class="kop-spacer"></td>
+        @endif
     </tr>
-    <tr><td class="kop-line" colspan="{{ ! empty($stationery['logo_data_uri']) ? 2 : 1 }}"></td></tr>
+    <tr><td class="kop-line" colspan="{{ ! empty($stationery['logo_data_uri']) ? 3 : 1 }}"></td></tr>
 </table>
