@@ -66,13 +66,13 @@
         table { border-collapse: collapse; font-family: Calibri, "Source Sans Pro", sans-serif; font-size: 11pt; width: 100%; }
         td, th { font-size: 11pt; }
         .kop { font-size: 11pt; text-align: center; }
-        .kop-spt { margin-bottom: 57px; }
+        .kop-spt { margin-bottom: 57px; margin-left: -10mm; width: 187.2mm; }
         .kop-sppd { margin-bottom: 16px; }
         .kop-logo { padding: 0; text-align: center; vertical-align: top; width: 150px; }
         .kop-logo img { display: block; height: 82px; margin: -7px auto 0; object-fit: contain; width: 58px; }
         .kop-content { padding: 0; position: relative; top: -3px; vertical-align: top; }
         .kop-content-inner { position: relative; }
-        .kop-with-logo .kop-content-inner { left: -75px; }
+        .kop-with-logo .kop-content-inner { left: -35px; }
         .kop-government { font-family: Times, "Times New Roman", serif; font-size: 19pt; font-weight: normal; letter-spacing: 0; line-height: .9; margin: 0 0 -4px; text-transform: uppercase; }
         .kop-agency { font-family: "Source Sans 3", "Source Sans Pro", sans-serif; font-size: 32px; font-weight: 900; letter-spacing: .02rem; line-height: .9; margin: 0; text-transform: uppercase; }
         @if(! empty($stationery['arial_black_font_path']) && is_readable($stationery['arial_black_font_path']))
