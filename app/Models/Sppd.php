@@ -16,6 +16,10 @@ class Sppd extends Model
 
     public const STATUS_VERIFIED = 'verified';
 
+    public const LETTERHEAD_AGENCY = 'agency';
+
+    public const LETTERHEAD_SECRETARIAT = 'secretariat';
+
     protected $fillable = [
         'spt_id',
         'unit_id',
@@ -26,6 +30,7 @@ class Sppd extends Model
         'registration_number',
         'document_number',
         'order_giver',
+        'letterhead_type',
         'travel_level',
         'travel_type',
         'departure_date',

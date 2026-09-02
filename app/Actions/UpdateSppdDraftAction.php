@@ -71,6 +71,9 @@ class UpdateSppdDraftAction
                 'sikkepo_pegawai_id' => $traveller['pegawai_id'],
                 'employee_snapshot' => $traveller,
                 'order_giver' => $payload['order_giver'],
+                'letterhead_type' => $payload['letterhead_type']
+                    ?? $draft->letterhead_type
+                    ?? Sppd::LETTERHEAD_AGENCY,
                 'travel_level' => $payload['travel_level'] ?? null,
                 'travel_type' => $payload['travel_type'] ?? null,
                 'departure_date' => $payload['departure_date'],

@@ -101,6 +101,7 @@ class CreateSppdAction
                 'registration_number' => $number['registration_number'],
                 'document_number' => $number['document_number'],
                 'order_giver' => $payload['order_giver'],
+                'letterhead_type' => $payload['letterhead_type'] ?? Sppd::LETTERHEAD_AGENCY,
                 'travel_level' => $payload['travel_level'] ?? null,
                 'travel_type' => $payload['travel_type'] ?? null,
                 'departure_date' => $payload['departure_date'],

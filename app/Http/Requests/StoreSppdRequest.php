@@ -2,7 +2,9 @@
 
 namespace App\Http\Requests;
 
+use App\Models\Sppd;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class StoreSppdRequest extends FormRequest
 {
@@ -16,6 +18,10 @@ class StoreSppdRequest extends FormRequest
         return [
             'traveller_nip' => ['required', 'string', 'max:32'],
             'order_giver' => ['required', 'string', 'max:200'],
+            'letterhead_type' => ['nullable', 'string', Rule::in([
+                Sppd::LETTERHEAD_AGENCY,
+                Sppd::LETTERHEAD_SECRETARIAT,
+            ])],
             'travel_level' => ['nullable', 'string', 'max:100'],
             'travel_type' => ['nullable', 'string', 'max:100'],
             'departure_date' => ['required', 'date_format:Y-m-d'],

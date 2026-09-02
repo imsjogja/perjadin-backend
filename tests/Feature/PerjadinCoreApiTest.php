@@ -252,6 +252,7 @@ class PerjadinCoreApiTest extends TestCase
         $sppd = $this->postJson("/api/v1/spts/{$spt['id']}/sppds", [
             'traveller_nip' => '198001012010011002',
             'order_giver' => 'Kepala BKD',
+            'letterhead_type' => Sppd::LETTERHEAD_SECRETARIAT,
             'travel_level' => 'Dalam Negeri',
             'travel_type' => 'Dinas Luar',
             'departure_date' => '2026-08-25',
@@ -272,6 +273,7 @@ class PerjadinCoreApiTest extends TestCase
             ->assertJsonPath('data.registration_number', '00001')
             ->assertJsonPath('data.document_number', '823-00001/BKD-SPPD/2026')
             ->assertJsonPath('data.status', 'draft')
+            ->assertJsonPath('data.letterhead_type', Sppd::LETTERHEAD_SECRETARIAT)
             ->assertJsonPath('data.employee_snapshot.nama', 'Pelaksana Perjalanan')
             ->assertJsonPath('data.followers.0.employee_snapshot.nama', 'Pengikut Perjalanan')
             ->json('data');
@@ -280,6 +282,10 @@ class PerjadinCoreApiTest extends TestCase
             'sppd_id' => $sppd['id'],
             'sikkepo_pegawai_id' => '10000000-0000-4000-8000-000000000003',
         ]);
+        $this->assertDatabaseHas('sppds', [
+            'id' => $sppd['id'],
+            'letterhead_type' => Sppd::LETTERHEAD_SECRETARIAT,
+        ]);
 
         $this->postJson("/api/v1/spts/{$spt['id']}/sppds", $this->sppdPayload())
             ->assertStatus(409)
@@ -287,10 +293,14 @@ class PerjadinCoreApiTest extends TestCase
 
         $this->patchJson("/api/v1/sppds/{$sppd['id']}", array_replace_recursive(
             $this->sppdPayload(),
-            ['description' => 'Koordinasi yang diperbarui']
+            [
+                'description' => 'Koordinasi yang diperbarui',
+                'letterhead_type' => Sppd::LETTERHEAD_AGENCY,
+            ]
         ))
             ->assertOk()
-            ->assertJsonPath('data.description', 'Koordinasi yang diperbarui');
+            ->assertJsonPath('data.description', 'Koordinasi yang diperbarui')
+            ->assertJsonPath('data.letterhead_type', Sppd::LETTERHEAD_AGENCY);
 
         $this->patchJson("/api/v1/sppds/{$sppd['id']}/verification")
             ->assertOk()
@@ -330,6 +340,23 @@ class PerjadinCoreApiTest extends TestCase
         $this->deleteJson("/api/v1/sppds/{$sppd['id']}")
             ->assertStatus(409)
             ->assertJsonPath('code', 'invalid_sppd_status');
+    }
+
+    public function test_sppd_rejects_invalid_letterhead_type(): void
+    {
+        $this->fakeSikkepo();
+        Sanctum::actingAs(User::factory()->create());
+
+        $spt = $this->postJson('/api/v1/spts', $this->sptPayload())->json('data');
+        $this->postJson("/api/v1/spts/{$spt['id']}/assignees", [
+            'nips' => ['198001012010011002'],
+        ])->assertCreated();
+
+        $this->postJson("/api/v1/spts/{$spt['id']}/sppds", $this->sppdPayload([
+            'letterhead_type' => 'unknown',
+        ]))
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors('letterhead_type');
     }
 
     public function test_document_number_is_reset_for_a_new_year(): void
@@ -502,9 +529,9 @@ class PerjadinCoreApiTest extends TestCase
     /**
      * @return array<string, mixed>
      */
-    private function sppdPayload(): array
+    private function sppdPayload(array $overrides = []): array
     {
-        return [
+        return array_replace_recursive([
             'traveller_nip' => '198001012010011002',
             'order_giver' => 'Kepala BKD',
             'departure_date' => '2026-08-25',
@@ -513,7 +540,7 @@ class PerjadinCoreApiTest extends TestCase
             'issued_place' => 'Manokwari',
             'issued_date' => '2026-08-20',
             'signatory' => ['nip' => '198001012010011001'],
-        ];
+        ], $overrides);
     }
 
     private function fakeSikkepo(): void

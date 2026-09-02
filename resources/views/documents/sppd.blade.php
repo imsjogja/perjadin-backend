@@ -10,7 +10,11 @@
         $group = data_get($employee, 'golongan.nama', data_get($employee, 'golongan'));
         $rank = $rankName && $group ? $rankName.' ('.$group.')' : ($rankName ?: $group);
         $eselon = data_get($employee, 'eselon.nama', data_get($employee, 'eselon'));
-        $useSecretariat = str_contains(strtoupper((string) $signatory->signatory_role), 'SEKDA');
+        $useSecretariat = $sppd->letterhead_type === \App\Models\Sppd::LETTERHEAD_SECRETARIAT
+            || (
+                $sppd->letterhead_type === null
+                && str_contains(strtoupper((string) $signatory->signatory_role), 'SEKDA')
+            );
     @endphp
     @include('documents.partials.stationery', [
         'stationery' => $stationery,
