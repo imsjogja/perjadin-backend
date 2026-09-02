@@ -23,6 +23,17 @@ return [
             'Jl.Brigjend Marinir (Pur) Abraham O. Atururi Kompleks Perkantoran Arfai'
         ),
         'city' => env('PERJADIN_STATIONERY_CITY', 'Manokwari'),
+        'secretariat_address' => env(
+            'PERJADIN_STATIONERY_SECRETARIAT_ADDRESS',
+            env(
+                'PERJADIN_STATIONERY_ADDRESS',
+                'Jl.Brigjend Marinir (Pur) Abraham O. Atururi Kompleks Perkantoran Arfai'
+            )
+        ),
+        'secretariat_city' => env(
+            'PERJADIN_STATIONERY_SECRETARIAT_CITY',
+            env('PERJADIN_STATIONERY_CITY', 'Manokwari')
+        ),
         /*
          * Logo resmi bawaan dapat diganti dengan path absolut melalui
          * PERJADIN_STATIONERY_LOGO_PATH bila instansi menerbitkan pembaruan.

@@ -1,3 +1,12 @@
+@php
+    $address = $useSecretariat
+        ? data_get($stationery, 'secretariat_address', data_get($stationery, 'address'))
+        : data_get($stationery, 'address');
+    $city = $useSecretariat
+        ? data_get($stationery, 'secretariat_city', data_get($stationery, 'city'))
+        : data_get($stationery, 'city');
+@endphp
+
 <table @class([
     'kop',
     'kop-'.$documentType,
@@ -11,7 +20,7 @@
             <div class="kop-content-inner">
                 <h2 class="kop-government">Pemerintah {{ $stationery['government'] }}</h2>
                 <h2 class="kop-agency">{{ $useSecretariat ? $stationery['secretariat'] : $stationery['agency'] }}</h2>
-                <span class="kop-address">{{ $stationery['address'] }} - {{ $stationery['city'] }}</span>
+                <span class="kop-address">{{ $address }} - {{ $city }}</span>
             </div>
         </td>
     </tr>
